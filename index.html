@@ -7,46 +7,46 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         :root { --primary: #0f172a; --accent: #0d9488; --bg: #f8fafc; }
-        body { font-family: 'Pretendard', sans-serif; background-color: #e2e8f0; margin: 0; padding: 0; overflow: hidden; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #e2e8f0; margin: 0; padding: 0; overflow-x: hidden; }
         
         .slide-container {
-            width: 1280px; height: 720px; background: white; margin: 20px auto;
+            width: 1280px; min-height: 720px; background: white; margin: 20px auto;
             position: relative; overflow: hidden; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-            display: none; flex-direction: column; padding: 60px; border-radius: 12px;
+            display: none; flex-direction: column; padding: 50px; border-radius: 12px;
         }
         .active { display: flex; }
         
-        /* 컨설팅 스타일 데코레이션 */
-        .slide-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .slide-title { font-family: 'Nanum Myeongjo', serif; font-size: 42px; color: var(--primary); margin: 0; }
+        .slide-header { border-bottom: 2px solid var(--primary); padding-bottom: 15px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .slide-title { font-family: 'Nanum Myeongjo', serif; font-size: 38px; color: var(--primary); margin: 0; }
         .slide-subtitle { color: var(--accent); font-weight: bold; }
 
         /* 지도 레이아웃 */
         .map-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; flex-grow: 1; align-items: center; }
         .map-card { 
-            background: var(--bg); border: 2px solid #e2e8f0; border-radius: 16px; padding: 30px; 
-            text-align: center; cursor: pointer; transition: all 0.3s; height: 100%; display: flex; flex-direction: column; justify-content: center;
+            background: var(--bg); border: 2px solid #e2e8f0; border-radius: 16px; padding: 25px; 
+            text-align: center; cursor: pointer; transition: all 0.3s; display: flex; flex-direction: column; justify-content: center;
         }
-        .map-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .map-card h3 { font-size: 28px; margin-bottom: 10px; }
-        .map-card p { font-size: 14px; color: #64748b; }
+        .map-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .map-card h3 { font-size: 26px; margin-bottom: 5px; }
+        .map-card p { font-size: 13px; color: #64748b; }
 
         /* 학습/퀴즈 UI */
-        .content-split { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; flex-grow: 1; }
-        .image-box { border-radius: 12px; overflow: hidden; height: 350px; background: #eee; border: 1px solid #ddd; position: relative; }
+        .content-split { display: grid; grid-template-columns: 1fr 1fr; gap: 35px; flex-grow: 1; }
+        .image-box { border-radius: 12px; overflow: hidden; height: 300px; background: #eee; border: 1px solid #ddd; position: relative; }
         .image-box img { width: 100%; height: 100%; object-fit: cover; }
-        .info-text { font-size: 18px; line-height: 1.6; color: #334155; white-space: pre-line; }
+        .info-text { font-size: 16px; line-height: 1.6; color: #334155; white-space: pre-line; }
         
-        .btn-action { background: var(--primary); color: white; padding: 15px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-action { background: var(--primary); color: white; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; }
         .btn-action:hover { opacity: 0.9; transform: scale(1.02); }
+        
+        .btn-capture { background: var(--accent); color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; font-size: 14px; }
+        .btn-capture:hover { opacity: 0.9; transform: scale(1.02); }
 
-        /* 업로드 UI */
-        .upload-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; background: #f1f5f9; cursor: pointer; }
-        .upload-zone:hover { border-color: var(--accent); background: #f0fdfa; }
+        .upload-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; text-align: center; background: #f1f5f9; cursor: pointer; }
 
-        /* 애니메이션 */
         @keyframes successPop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .success-overlay { position: absolute; inset: 0; background: rgba(13, 148, 136, 0.9); display: none; justify-content: center; align-items: center; z-index: 50; animation: successPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); color: white; border-radius: 12px; }
     </style>
@@ -54,15 +54,17 @@
 <body>
 
 <div class="slide-container active" id="slide-login">
-    <div style="margin: auto; text-align: center; max-width: 600px;">
-        <h1 style="font-size: 64px; margin-bottom: 10px; font-family: 'Nanum Myeongjo';">부산 고장 탐사대</h1>
-        <p style="font-size: 20px; color: #64748b; margin-bottom: 50px;">3학년 사회 - 우리 고장의 모습 실감 학습</p>
-        <div class="space-y-4">
-            <input type="number" id="st-num" placeholder="학급 번호" class="w-full p-4 border rounded-lg text-lg">
-            <input type="text" id="st-name" placeholder="이름" class="w-full p-4 border rounded-lg text-lg">
+    <div style="margin: auto; text-align: center; max-width: 500px;" class="w-full">
+        <h1 style="font-size: 56px; margin-bottom: 10px; font-family: 'Nanum Myeongjo';">부산 고장 탐사대</h1>
+        <p style="font-size: 18px; color: #64748b; margin-bottom: 40px;">3학년 사회 - 우리 고장의 모습 실감 학습</p>
+        <div class="space-y-4 text-left">
+            <input type="number" id="st-num" placeholder="학급 번호 (예: 5)" class="w-full p-4 border rounded-lg text-lg">
+            <input type="text" id="st-name" placeholder="이름 (예: 홍길동)" class="w-full p-4 border rounded-lg text-lg">
             <button onclick="app.start()" class="w-full btn-action" style="font-size: 20px;">탐사 시작하기</button>
         </div>
-        <p style="margin-top: 30px; font-size: 12px; color: #94a3b8;">※ 구글 드라이브와 Firebase 실시간 연동 시스템</p>
+        <div class="mt-12 pt-4 border-t border-slate-200 text-right">
+            <button onclick="app.checkTeacherPassword()" class="text-xs text-slate-400 hover:underline">📊 교사 모니터링 열기</button>
+        </div>
     </div>
 </div>
 
@@ -72,42 +74,77 @@
         <div class="slide-subtitle" id="user-info"></div>
     </div>
     <div class="map-grid">
-        <div class="map-card" style="grid-column: 2" onclick="app.goDetail('dong')"><h3>동구</h3><p>초량 이바구길 / 168계단</p><span id="chk-dong">🤍</span></div>
-        <div class="map-card" onclick="app.goDetail('saha')"><h3>사하구</h3><p>다대포 / 감천문화마을</p><span id="chk-saha">🤍</span></div>
-        <div class="map-card" onclick="app.goDetail('seo')"><h3>서구</h3><p>송도 해수욕장 / 구름다리</p><span id="chk-seo">🤍</span></div>
-        <div class="map-card" onclick="app.goDetail('jung')"><h3>중구</h3><p>자갈치시장 / 용두산공원</p><span id="chk-jung">🤍</span></div>
-        <div class="map-card" style="grid-column: 2" onclick="app.goDetail('yeongdo')"><h3>영도구</h3><p>태종대 / 흰여울문화마을</p><span id="chk-yeongdo">🤍</span></div>
+        <div class="map-card" style="grid-column: 2" onclick="app.goDetail('dong')"><h3>동구</h3><p>초량 이바구길 / 168계단</p><span id="chk-dong" class="text-xl mt-2">🤍 미완료</span></div>
+        <div class="map-card" onclick="app.goDetail('saha')"><h3>사하구</h3><p>다대포 / 감천문화마을</p><span id="chk-saha" class="text-xl mt-2">🤍 미완료</span></div>
+        <div class="map-card" onclick="app.goDetail('seo')"><h3>서구</h3><p>송도 해수욕장 / 구름다리</p><span id="chk-seo" class="text-xl mt-2">🤍 미완료</span></div>
+        <div class="map-card" onclick="app.goDetail('jung')"><h3>중구</h3><p>자갈치시장 / 용두산공원</p><span id="chk-jung" class="text-xl mt-2">🤍 미완료</span></div>
+        <div class="map-card" style="grid-column: 2" onclick="app.goDetail('yeongdo')"><h3>영도구</h3><p>태종대 / 흰여울문화마을</p><span id="chk-yeongdo" class="text-xl mt-2">🤍 미완료</span></div>
     </div>
 </div>
 
 <div class="slide-container" id="slide-detail">
     <div class="slide-header">
         <h2 class="slide-title" id="det-title">고장 이름</h2>
-        <button onclick="app.goMap()" class="text-slate-500 font-bold hover:underline">🏠 지도로 돌아가기</button>
+        <button onclick="app.goMap()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 font-bold rounded-lg flex items-center gap-1">🏠 지도 홈으로</button>
     </div>
     <div class="content-split">
-        <div class="space-y-6">
+        <div class="space-y-4">
             <div class="image-box">
                 <img id="det-img" src="" alt="실사">
                 <div id="upload-success" class="success-overlay flex-col">
-                    <span class="text-4xl">📸</span>
-                    <span class="font-bold mt-2">나의 사진 업로드 성공!</span>
+                    <span class="text-4xl">🎉</span>
+                    <span class="font-bold mt-2 text-xl">나의 사진 업로드 성공! 💥</span>
                 </div>
             </div>
-            <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-in').click()">
-                <p class="font-bold text-slate-700">📸 사진 올리기 또는 스크린샷 붙여넣기</p>
-                <p class="text-xs text-slate-500 mt-1">이곳을 클릭해 파일을 선택하거나 Ctrl+V를 누르세요</p>
+            
+            <div class="flex gap-2 items-center">
+                <button onclick="app.captureAndUpload()" class="btn-capture flex-1 py-3 text-base">📸 현재 화면 캡처 및 자동 올리기</button>
+                <button onclick="document.getElementById('file-in').click()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-3 text-xs font-bold rounded-lg shrink-0">📂 파일 선택</button>
+            </div>
+
+            <div class="upload-zone" id="drop-zone">
+                <p class="font-bold text-slate-700 text-sm">📸 외부 스크린샷 붙여넣기(Ctrl+V)</p>
                 <input type="file" id="file-in" class="hidden" accept="image/*" onchange="app.handleFile(this.files[0])">
             </div>
         </div>
+        
         <div class="flex flex-col justify-between">
-            <p id="det-desc" class="info-text"></p>
-            <div class="bg-slate-50 p-6 rounded-xl border">
-                <p class="font-bold mb-4 text-slate-800">✏️ 확인 퀴즈</p>
-                <p id="det-quiz" class="text-lg mb-4"></p>
+            <div>
+                <p class="font-bold text-slate-800 text-lg mb-1">📖 학습 설명</p>
+                <p id="det-desc" class="info-text bg-slate-50 p-3 rounded-lg border border-slate-100 mb-3 max-h-36 overflow-y-auto"></p>
+                
+                <a id="det-link" href="#" target="_blank" class="block text-center text-sm font-bold text-blue-600 bg-blue-50 py-2 rounded-lg hover:underline border border-blue-200 mb-4">🌐 고장 공식 홈페이지 구경하기 (클릭)</a>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <p class="font-bold mb-2 text-orange-600 flex items-center gap-1">❓ 딩동댕 확인문제</p>
+                <p id="det-quiz" class="font-bold text-slate-800 text-base mb-3"></p>
                 <div id="det-opts" class="grid grid-cols-2 gap-2"></div>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="slide-container" id="slide-teacher" style="height:auto; min-height:600px;">
+    <div class="slide-header">
+        <h2 class="slide-title">📊 [교사용] 학생 실시간 진도 모니터링</h2>
+        <button onclick="app.closeTeacherView()" class="bg-slate-800 text-white px-4 py-2 text-sm font-bold rounded-lg">🔒 대시보드 닫기</button>
+    </div>
+    <div class="overflow-x-auto w-full">
+        <table class="w-full text-left border-collapse text-sm">
+            <thead>
+                <tr class="bg-slate-100 text-slate-700 font-bold">
+                    <th class="p-3 border-b">번호</th>
+                    <th class="p-3 border-b">이름</th>
+                    <th class="p-3 border-b">현재 상태 / 위치</th>
+                    <th class="p-3 border-b">완료 도장</th>
+                    <th class="p-3 border-b">최근 기록 시간</th>
+                </tr>
+            </thead>
+            <tbody id="student-list" class="text-slate-600 divide-y divide-slate-100">
+                <tr><td colspan="5" class="p-8 text-center text-slate-400">학생 접속을 기다리는 중...</td></tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -115,7 +152,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, setDoc, onSnapshot, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // 1. Firebase 설정
+    // Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyCS8kWxKMV9qk06wxeEaYnNa9FK652CDsU",
         authDomain: "sahagu-69868.firebaseapp.com",
@@ -126,32 +163,32 @@
         measurementId: "G-35GC10BWF1"
     };
 
-    // 2. 구글 앱스 스크립트(GAS) 웹 앱 URL 🌟(선생님이 주신 주소 연동 완료!)
+    // 구글 앱스 스크립트 웹 앱 주소
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzAVpdjYIrIYFOTHyqDAhAdoFgufoaRm3HmMqvvZumbrDTSnfgqaJSvIb9GEVNptwgi/exec"; 
 
     const app_fb = initializeApp(firebaseConfig);
     const db = getFirestore(app_fb);
 
     const zoneData = {
-        saha: { name: "사하구", img: "DA.jpg", desc: "다대포 해수욕장은 넓은 갯벌이 있어 조개잡이 체험이 가능하며, 세계적인 낙조 분수로 유명합니다. 감천문화마을은 계단식 마을로 '부산의 마추픽추'라 불립니다.", quiz: "다대포에서 할 수 있는 체험은?", opts: ["스키 타기", "조개 잡기", "눈썰매 타기", "사막 탐험"], ans: 1 },
-        seo: { name: "서구", img: "SONG.jpg", desc: "송도 해수욕장은 우리나라 1호 해수욕장입니다. 바다 위를 걷는 듯한 구름산책로와 짜릿한 해상케이블카를 즐길 수 있습니다.", quiz: "우리나라 1호 해수욕장의 이름은?", opts: ["해운대", "광안리", "송도", "다대포"], ans: 2 },
-        yeongdo: { name: "영도구", img: "TAE.jpg", desc: "태종대는 깎아지른 절벽과 푸른 바다가 어우러진 명승지입니다. 흰여울문화마을은 절벽 끝 바다길을 따라 걷는 아름다운 마을입니다.", quiz: "영도의 남쪽 끝, 절벽이 아름다운 곳은?", opts: ["태종대", "용두산", "어린이대공원", "시민공원"], ans: 0 },
-        jung: { name: "중구", img: "JA.jpg", desc: "자갈치시장은 부산에서 가장 큰 수산물 시장입니다. '오이소 보이소 사이소'라는 구호로 유명하며 싱싱한 생선이 가득합니다.", quiz: "부산의 대표적인 수산물 시장은?", opts: ["국제시장", "자갈치시장", "평화시장", "꽃시장"], ans: 1 },
-        dong: { name: "동구", img: "GAM.jpg", desc: "초량 이바구길은 산복도로의 역사를 담은 길입니다. 168계단과 모노레일은 가파른 동네를 연결해주는 신기한 교통수단입니다.", quiz: "동구의 가파른 계단 수는 몇 개인가요?", opts: ["100개", "150개", "168개", "200개"], ans: 2 }
+        saha: { name: "사하구 (다대포 & 감천마을)", img: "DA.jpg", link: "https://www.saha.go.kr", desc: "🌊 다대포 해수욕장: 백사장이 아주 넓고 부드러운 갯벌이 발달하여 신나는 조개잡이 체험을 할 수 있어요.\n🏡 감천문화마을: 앞집이 뒷집을 가리지 않는 계단식 마을로, 예쁜 골목 예술로 유명해요.", quiz: "다대포 해수욕장에 발달해 있어 초등학생들이 조개잡이 체험을 하기 좋은 곳은 어디일까요?", opts: ["자갈밭", "절벽 동굴", "넓은 갯벌", "깊은 바다"], ans: 2 },
+        seo: { name: "서구 (송도 구름산책로)", img: "SONG.jpg", link: "https://www.bsseogu.go.kr", desc: "🏖️ 송도해수욕장: 우리나라 제 1호 해수욕장 타이틀을 가지고 있어요.\n🚡 구름산책로: 바다 위에 투명한 다리를 놓아 마치 구름 위를 걷듯 출렁이는 파도를 내려다볼 수 있어요.", quiz: "우리나라에서 가장 먼저 만들어진 '제 1호 공설 해수욕장'의 이름은 무엇일까요?", opts: ["해운대해수욕장", "송도해수욕장", "광안리해수욕장", "다대포해수욕장"], ans: 1 },
+        yeongdo: { name: "영도구 (태종대 & 흰여울)", img: "TAE.jpg", link: "https://www.yeongdo.go.kr", desc: "⛰️ 태종대: 깎아지른 바위 절벽과 울창한 수목이 바다와 어우러진 신비로운 명소예요.\n🌊 흰여울문화마을: 바다 절벽 끝에 옹기종기 붙은 흰 마을길이 참 아름다워요.", quiz: "영도 가장 남쪽에 위치하며 날씨가 맑으면 대마도까지 보이는 절벽 절경 명소는?", opts: ["금정산성", "용두산공원", "태종대", "초량이바구길"], ans: 2 },
+        jung: { name: "중구 (자갈치시장)", img: "JA.jpg", link: "https://www.bsjunggu.go.kr", desc: "🐟 자갈치시장: 부산 하면 떠오르는 가장 크고 활기찬 생선·수산물 전문 시장이랍니다.\n🗼 용두산공원: 도심 한복판 산 위에 우뚝 솟은 부산타워에서 고장의 경치를 사방으로 둘러봐요.", quiz: "부산을 대표하는 수산물 시장으로 \"오이소, 보이소, 사이소!\"의 외침이 가득한 이곳은?", opts: ["자갈치시장", "국제시장", "부평깡통시장", "초량시장"], ans: 0 },
+        dong: { name: "동구 (초량 이바구길)", img: "GAM.jpg", link: "https://www.bsdonggu.go.kr", desc: "🏃‍♂️ 초량 이바구길: 부산항이 내려다보이는 산복도로 동네의 살아있는 역사와 이야기를 담은 계단길이에요.\n💡 168계단: 가파른 옛날 계단 옆으로 주민과 관광객을 위한 모노레일이 움직여요.", quiz: "과거 산복도로 마을의 애환이 서려 있으며, 지금은 모노레일이 설치된 동구의 가파른 계단 수는?", opts: ["100계단", "120계단", "150계단", "168계단"], ans: 3 }
     };
 
     window.app = {
         stKey: "", num: "", name: "", currentZone: "",
-        learned: new Set(),
+        learned: new Set(), unsub: null,
 
         start: async function() {
-            this.num = document.getElementById('st-num').value;
-            this.name = document.getElementById('st-name').value;
-            if(!this.num || !this.name) return alert("정보를 입력하세요.");
+            this.num = document.getElementById('st-num').value.trim();
+            this.name = document.getElementById('st-name').value.trim();
+            if(!this.num || !this.name) return alert("번호와 이름을 입력하세요.");
             this.stKey = `${this.num.padStart(2,'0')}_${this.name}`;
-            document.getElementById('user-info').innerText = `${this.num}번 ${this.name} 탐험가`;
+            document.getElementById('user-info').innerText = `🧭 ${this.num}번 ${this.name} 탐험가`;
             this.showSlide('slide-map');
-            this.updateLMS("탐험 시작");
+            this.updateLMS("지도 대기 중");
         },
 
         showSlide: (id) => {
@@ -159,7 +196,7 @@
             document.getElementById(id).classList.add('active');
         },
 
-        goMap: function() { this.showSlide('slide-map'); this.updateLMS("지도 대기"); },
+        goMap: function() { this.showSlide('slide-map'); this.updateLMS("지도 대기 중"); },
 
         goDetail: function(key) {
             this.currentZone = key;
@@ -167,71 +204,134 @@
             document.getElementById('det-title').innerText = data.name;
             document.getElementById('det-img').src = data.img;
             document.getElementById('det-desc').innerText = data.desc;
-            document.getElementById('det-quiz').innerText = data.quiz;
+            document.getElementById('det-link').href = data.link;
             document.getElementById('upload-success').style.display = 'none';
             
             const optsDiv = document.getElementById('det-opts');
             optsDiv.innerHTML = '';
             data.opts.forEach((opt, idx) => {
                 const btn = document.createElement('button');
-                btn.innerText = opt;
-                btn.className = "p-3 border rounded-lg hover:bg-slate-100 text-sm";
+                btn.innerText = `${idx+1}. ${opt}`;
+                btn.className = "w-full text-left p-2.5 border rounded-lg hover:bg-orange-50 font-medium text-slate-700 text-sm transition";
                 btn.onclick = () => this.checkAns(idx);
                 optsDiv.appendChild(btn);
             });
             this.showSlide('slide-detail');
-            this.updateLMS(`${data.name} 학습 중`);
+            this.updateLMS(`${data.name} 공부 중`);
         },
 
         checkAns: function(idx) {
-            if(idx === zoneData[this.currentZone].ans) {
-                alert("딩동댕! 정답입니다.");
+            const data = zoneData[this.currentZone];
+            if(idx === data.ans) {
+                try { new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-84.wav').play(); } catch(e){}
+                alert("🎉 정답입니다! 탐험 도장이 찍혔습니다.");
                 this.learned.add(this.currentZone);
-                document.getElementById(`chk-${this.currentZone}`).innerText = "✅";
-                this.updateLMS(`${zoneData[this.currentZone].name} 마스터!`);
+                
+                const badge = document.getElementById(`chk-${this.currentZone}`);
+                badge.innerText = "✅ 탐험 완료";
+                badge.className = "text-xl font-bold text-emerald-600 mt-2";
+                
+                this.updateLMS(`${data.name} 도장 획득!`);
+                setTimeout(() => { this.goMap(); }, 1000);
             } else {
-                alert("다시 한 번 읽어볼까요?");
+                alert("❌ 다시 한 번 설명판을 읽어보고 풀어볼까요?");
             }
         },
 
         updateLMS: async function(status) {
+            if(!this.stKey) return;
             await setDoc(doc(db, "seobusan_lms_v2", this.stKey), {
-                num: parseInt(this.num), name: this.name, status: status, count: this.learned.size, time: new Date().toLocaleTimeString()
+                num: parseInt(this.num), name: this.name, status: status, count: this.learned.size, time: new Date().toLocaleTimeString('ko-KR')
             }, { merge: true });
         },
 
-        // 📸 사진 및 스크린샷 처리 로직
+        captureAndUpload: async function() {
+            const btn = document.querySelector('.btn-capture');
+            btn.innerText = "📸 화면 캡처 중...";
+            btn.disabled = true;
+
+            const activeSlide = document.querySelector('.slide-container.active');
+            
+            html2canvas(activeSlide, { scale: 1, logging: false, useCORS: true }).then(canvas => {
+                canvas.toBlob(blob => {
+                    if(blob) {
+                        const file = new File([blob], `${this.stKey}_${this.currentZone}_캡처.png`, { type: "image/png" });
+                        this.handleFile(file);
+                    }
+                    btn.innerText = "📸 현재 화면 캡처 및 자동 올리기";
+                    btn.disabled = false;
+                });
+            }).catch(err => {
+                alert("캡처 중 에러 발생");
+                btn.innerText = "📸 현재 화면 캡처 및 자동 올리기";
+                btn.disabled = false;
+            });
+        },
+
         handleFile: async function(file) {
             if(!file) return;
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const base64Data = e.target.result.split(',')[1];
-                const payload = {
-                    fileName: `${this.stKey}_${this.currentZone}.png`,
-                    mimeType: file.type,
-                    base64: base64Data
-                };
+                const payload = { fileName: file.name, mimeType: file.type, base64: base64Data };
 
-                // 구글 드라이브로 파일 전송
                 try {
-                    const response = await fetch(GAS_URL, {
-                        method: "POST",
-                        body: JSON.stringify(payload)
-                    });
+                    const response = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
                     const result = await response.json();
                     if(result.result === "success") {
                         document.getElementById('upload-success').style.display = 'flex';
-                        this.updateLMS(`${zoneData[this.currentZone].name} 사진 업로드함`);
+                        this.updateLMS(`${zoneData[this.currentZone].name} 스크린샷 기록 완료`);
                     }
                 } catch (err) {
-                    alert("업로드 중 오류가 발생했습니다. 구글 권한 설정을 확인하세요.");
+                    alert("구글 드라이브 전송 실패. 권한 설정을 확인해 보세요.");
                 }
             };
             reader.readAsDataURL(file);
+        },
+
+        // 🔒 [보안 추가] 교사 비밀번호 확인창 함수
+        checkTeacherPassword: function() {
+            const password = prompt("교사 인증 비밀번호를 입력해 주세요.");
+            if (password === "1532") {
+                this.toggleTeacherView(); // 비밀번호가 맞으면 대시보드 열기
+            } else if (password !== null) {
+                alert("❌ 비밀번호가 올바르지 않습니다. 학생들은 접근할 수 없습니다.");
+            }
+        },
+
+        // 교사 대시보드 실시간 로딩
+        toggleTeacherView: function() {
+            this.showSlide('slide-teacher');
+            const q = query(collection(db, "seobusan_lms_v2"), orderBy("num", "asc"));
+            this.unsub = onSnapshot(q, (snapshot) => {
+                const tbody = document.getElementById('student-list');
+                tbody.innerHTML = '';
+                if(snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">현재 학습 중인 학생이 없습니다.</td></tr>`;
+                    return;
+                }
+                snapshot.forEach((doc) => {
+                    const d = doc.data();
+                    const row = document.createElement('tr');
+                    row.className = "border-b hover:bg-slate-50 transition";
+                    row.innerHTML = `
+                        <td class="p-3 font-bold">${d.num}번</td>
+                        <td class="p-3">${d.name}</td>
+                        <td class="p-3 text-slate-600">${d.status}</td>
+                        <td class="p-3 font-bold text-emerald-600">${d.count} / 5 개 완료</td>
+                        <td class="p-3 text-slate-400 text-xs">${d.time}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            });
+        },
+
+        closeTeacherView: function() {
+            if (this.unsub) this.unsub();
+            this.stKey ? this.showSlide('slide-map') : this.showSlide('slide-login');
         }
     };
 
-    // 붙여넣기(Ctrl+V) 감지하여 스크린샷 즉시 업로드
     window.addEventListener('paste', (e) => {
         const item = e.clipboardData.items[0];
         if (item && item.type.indexOf('image') !== -1) {
