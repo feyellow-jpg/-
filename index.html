@@ -5,100 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>서부산·원도심 고장 탐사대</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght=400;700&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         :root { --primary: #0f172a; --accent: #0d9488; --bg: #f8fafc; }
-        body { font-family: 'Pretendard', sans-serif; background-color: #e2e8f0; margin: 0; padding: 0; overflow-x: hidden; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #cbd5e1; margin: 0; padding: 0; }
         
+        /* 메인 슬라이드 컨테이너 (컨설팅 레이아웃) */
         .slide-container {
-            width: 1280px; min-height: 750px; background: white; margin: 20px auto;
-            position: relative; overflow: hidden; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-            display: none; flex-direction: column; padding: 50px; border-radius: 12px;
+            width: 1280px; height: 780px; background: white; margin: 20px auto;
+            position: relative; overflow: hidden; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            display: none; flex-direction: column; padding: 50px; border-radius: 16px;
         }
         .active { display: flex; }
         
-        .slide-header { border-bottom: 2px solid var(--primary); padding-bottom: 15px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .slide-title { font-family: 'Nanum Myeongjo', serif; font-size: 38px; color: var(--primary); margin: 0; }
-        .slide-subtitle { color: var(--accent); font-weight: bold; }
+        .slide-header { border-bottom: 3px solid var(--primary); padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .slide-title { font-family: 'Nanum Myeongjo', serif; font-size: 40px; color: var(--primary); margin: 0; }
+        .slide-subtitle { color: var(--accent); font-weight: bold; font-size: 18px; }
 
-        /* 🗺️ 부산 지형에 맞춘 3x3 바둑판식 현실적 지도 배치 */
-        .map-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 20px; flex-grow: 1; height: 450px; }
+        /* 🗺️ 지형 기반 지도 배치 (사하-서-중-동-영도) */
+        .map-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 15px; flex-grow: 1; }
         .map-card { 
-            background: var(--bg); border: 2px solid #e2e8f0; border-radius: 16px; padding: 15px; 
+            background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 20px; padding: 10px; 
             text-align: center; cursor: pointer; transition: all 0.3s; display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-        .map-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .map-card h3 { font-size: 26px; font-weight: bold; margin-bottom: 2px; }
-        .map-card p { font-size: 13px; color: #64748b; }
+        .map-card:hover { border-color: var(--accent); background: white; transform: scale(1.03); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .map-card h3 { font-size: 32px; font-weight: bold; color: var(--primary); }
+        .map-card p { font-size: 14px; color: #475569; }
 
-        /* 학습/퀴즈/기록 UI */
-        .content-split { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 35px; flex-grow: 1; }
-        .image-box { border-radius: 12px; overflow: hidden; height: 280px; background: #eee; border: 1px solid #ddd; position: relative; }
+        /* 학습 레이아웃 */
+        .content-split { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; flex-grow: 1; }
+        .image-box { border-radius: 12px; overflow: hidden; height: 320px; background: #f8fafc; border: 1px solid #e2e8f0; position: relative; }
         .image-box img { width: 100%; height: 100%; object-fit: cover; }
-        .info-text { font-size: 15px; line-height: 1.5; color: #334155; white-space: pre-line; }
         
-        .btn-action { background: var(--primary); color: white; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; }
-        .btn-action:hover { opacity: 0.9; transform: scale(1.02); }
-        
-        .btn-capture { background: var(--accent); color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; font-size: 14px; }
-        .btn-capture:hover { opacity: 0.9; transform: scale(1.02); }
+        .btn-capture { background: var(--accent); color: white; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; border: none; }
+        .btn-capture:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
-        .upload-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 12px; text-align: center; background: #f1f5f9; cursor: pointer; }
+        /* 대시보드 썸네일 스타일 */
+        .thumb-img { width: 80px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; cursor: pointer; }
 
-        @keyframes successPop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        .success-overlay { position: absolute; inset: 0; background: rgba(13, 148, 136, 0.9); display: none; justify-content: center; align-items: center; z-index: 50; animation: successPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); color: white; border-radius: 12px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
     </style>
 </head>
 <body>
 
 <div class="slide-container active" id="slide-login">
-    <div style="margin: auto; text-align: center; max-width: 500px;" class="w-full">
-        <h1 style="font-size: 56px; margin-bottom: 10px; font-family: 'Nanum Myeongjo';">부산 고장 탐사대</h1>
-        <p style="font-size: 18px; color: #64748b; margin-bottom: 40px;">3학년 사회 - 우리 고장의 모습 실감 학습</p>
+    <div style="margin: auto; text-align: center; max-width: 500px;" class="fade-in">
+        <h1 style="font-size: 72px; margin-bottom: 10px; font-family: 'Nanum Myeongjo'; color: var(--primary);">부산 탐사대</h1>
+        <p style="font-size: 22px; color: #64748b; margin-bottom: 50px; font-weight: 500;">고장을 탐험하고 기록하는 우리반 탐사 일지</p>
         <div class="space-y-4 text-left">
-            <input type="number" id="st-num" placeholder="학급 번호 (예: 5)" class="w-full p-4 border rounded-lg text-lg">
-            <input type="text" id="st-name" placeholder="이름 (예: 홍길동)" class="w-full p-4 border rounded-lg text-lg">
-            <button onclick="app.start()" class="w-full btn-action" style="font-size: 20px;">탐사 시작하기</button>
+            <input type="number" id="st-num" placeholder="학급 번호" class="w-full p-4 border-2 rounded-xl text-xl focus:border-teal-500 outline-none">
+            <input type="text" id="st-name" placeholder="이름" class="w-full p-4 border-2 rounded-xl text-xl focus:border-teal-500 outline-none">
+            <button onclick="app.start()" class="w-full bg-slate-900 text-white p-5 rounded-xl font-bold text-2xl hover:bg-black transition shadow-lg">탐사 시작하기</button>
         </div>
-        <div class="mt-12 pt-4 border-t border-slate-200 text-right">
-            <button onclick="app.checkTeacherPassword()" class="text-xs text-slate-400 hover:underline">📊 교사 모니터링 열기 (비번 필요)</button>
+        <div class="mt-16 pt-6 border-t text-right">
+            <button onclick="app.checkTeacherPassword()" class="text-sm text-slate-400 hover:text-slate-600 font-bold underline">📊 교사용 대시보드 (비번 1532)</button>
         </div>
     </div>
 </div>
 
 <div class="slide-container" id="slide-map">
     <div class="slide-header">
-        <h2 class="slide-title">고장 탐사 지도</h2>
+        <h2 class="slide-title">탐사 지역 선택</h2>
         <div class="slide-subtitle" id="user-info"></div>
     </div>
     <div class="map-grid">
         <div></div>
         <div class="map-card" onclick="app.goDetail('dong')">
-            <span class="text-xs font-bold text-slate-400">북쪽 원도심</span>
-            <h3>동구</h3><p>초량 이바구길 / 168계단</p><span id="chk-dong" class="text-sm mt-1">🤍 미완료</span>
+            <span class="text-xs font-bold text-teal-600">북쪽 원도심</span>
+            <h3>동구</h3><p>초량 이바구길 / 168계단</p><span id="chk-dong" class="text-sm mt-1 text-slate-400">🤍 미완료</span>
         </div>
         <div></div>
 
         <div class="map-card" onclick="app.goDetail('saha')">
-            <span class="text-xs font-bold text-slate-400">서쪽 바다</span>
-            <h3>사하구</h3><p>다대포 / 감천문화마을</p><span id="chk-saha" class="text-sm mt-1">🤍 미완료</span>
+            <span class="text-xs font-bold text-teal-600">서쪽 바다</span>
+            <h3>사하구</h3><p>다대포 / 감천문화마을</p><span id="chk-saha" class="text-sm mt-1 text-slate-400">🤍 미완료</span>
         </div>
         <div class="map-card" onclick="app.goDetail('seo')">
-            <span class="text-xs font-bold text-slate-400">중앙 원도심</span>
-            <h3>서구</h3><p>송도 해수욕장 / 구름다리</p><span id="chk-seo" class="text-sm mt-1">🤍 미완료</span>
+            <span class="text-xs font-bold text-teal-600">중앙 원도심</span>
+            <h3>서구</h3><p>송도 / 구름산책로</p><span id="chk-seo" class="text-sm mt-1 text-slate-400">🤍 미완료</span>
         </div>
         <div class="map-card" onclick="app.goDetail('jung')">
-            <span class="text-xs font-bold text-slate-400">중앙 상업지</span>
-            <h3>중구</h3><p>자갈치시장 / 용두산공원</p><span id="chk-jung" class="text-sm mt-1">🤍 미완료</span>
+            <span class="text-xs font-bold text-teal-600">중앙 상업지</span>
+            <h3>중구</h3><p>자갈치시장 / 부산타워</p><span id="chk-jung" class="text-sm mt-1 text-slate-400">🤍 미완료</span>
         </div>
 
         <div></div>
         <div></div>
         <div class="map-card" onclick="app.goDetail('yeongdo')">
-            <span class="text-xs font-bold text-slate-400">남쪽 섬 고장</span>
-            <h3>영도구</h3><p>태종대 / 흰여울문화마을</p><span id="chk-yeongdo" class="text-sm mt-1">🤍 미완료</span>
+            <span class="text-xs font-bold text-teal-600">남쪽 섬 고장</span>
+            <h3>영도구</h3><p>태종대 / 흰여울마을</p><span id="chk-yeongdo" class="text-sm mt-1 text-slate-400">🤍 미완료</span>
         </div>
     </div>
 </div>
@@ -106,73 +104,70 @@
 <div class="slide-container" id="slide-detail">
     <div class="slide-header">
         <h2 class="slide-title" id="det-title">고장 이름</h2>
-        <button onclick="app.goMap()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 font-bold rounded-lg flex items-center gap-1">🏠 지도 홈으로</button>
+        <button onclick="app.goMap()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2 font-bold rounded-lg border">🏠 지도 홈으로</button>
     </div>
     <div class="content-split">
         <div class="space-y-4">
-            <div class="image-box">
+            <div class="image-box shadow-inner border-2">
                 <img id="det-img" src="" alt="실사" crossorigin="anonymous">
                 <div id="upload-success" class="success-overlay flex-col">
-                    <span class="text-4xl">🎉</span>
-                    <span class="font-bold mt-2 text-xl">나의 기록 업로드 성공! 💥</span>
+                    <span class="text-5xl">✅</span>
+                    <span class="font-bold mt-2 text-2xl">나의 기록 전송 완료!</span>
                 </div>
             </div>
             
-            <div class="flex gap-2 items-center">
-                <button onclick="app.captureAndUpload()" class="btn-capture flex-1 py-3 text-base shadow-sm">📸 현재 화면 캡처 및 자동 올리기</button>
-                <button onclick="document.getElementById('file-in').click()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-3 text-xs font-bold rounded-lg shrink-0">📂 파일 선택</button>
-            </div>
+            <button onclick="app.captureAndUpload()" class="btn-capture text-lg shadow-md">📸 현재 이 화면 캡처하여 일지에 올리기</button>
 
-            <div class="upload-zone" id="drop-zone">
-                <p class="font-bold text-slate-700 text-xs">📸 외부 스크린샷 붙여넣기(Ctrl+V)</p>
+            <div class="flex gap-2">
+                <div class="bg-slate-100 p-3 rounded-lg flex-1 text-center text-xs text-slate-500 border border-dashed">
+                    ※ 캡처 버튼을 누르면 선생님 구글 드라이브로 사진이 실시간 전송됩니다.
+                </div>
+                <button onclick="document.getElementById('file-in').click()" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-bold">파일 선택</button>
                 <input type="file" id="file-in" class="hidden" accept="image/*" onchange="app.handleFile(this.files[0])">
             </div>
         </div>
         
-        <div class="flex flex-col justify-between space-y-4">
-            <div>
-                <p class="font-bold text-slate-800 text-base mb-1">📖 학습 설명</p>
-                <p id="det-desc" class="info-text bg-slate-50 p-2.5 rounded-lg border border-slate-100 mb-2 max-h-24 overflow-y-auto text-sm"></p>
-                <a id="det-link" href="#" target="_blank" class="block text-center text-xs font-bold text-blue-600 bg-blue-50 py-1.5 rounded-lg hover:underline border border-blue-200">🌐 고장 공식 홈페이지 구경하기 (클릭)</a>
+        <div class="flex flex-col justify-between">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <p class="font-bold text-slate-800 mb-2">📖 고장 이야기</p>
+                <p id="det-desc" class="text-sm leading-relaxed text-slate-600 mb-3 whitespace-pre-line"></p>
+                <a id="det-link" href="#" target="_blank" class="block text-center text-xs font-bold text-blue-600 bg-blue-50 py-2 rounded-lg hover:underline border">🌐 공식 웹사이트 구경하기 (클릭)</a>
             </div>
 
-            <div class="bg-teal-50/50 p-3 rounded-xl border border-teal-100">
-                <p class="font-bold text-teal-800 text-sm mb-1.5">📝 이 장소에 대한 생각이나 느낀 점 적기</p>
+            <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                <p class="font-bold text-amber-800 text-sm mb-2">✏️ 고장 확인문제</p>
+                <p id="det-quiz" class="font-bold text-slate-800 text-sm mb-3"></p>
+                <div id="det-opts" class="grid grid-cols-2 gap-2"></div>
+            </div>
+
+            <div class="bg-teal-50 p-4 rounded-xl border border-teal-200">
+                <p class="font-bold text-teal-800 text-sm mb-2">📝 탐험하며 느낀 점 한 줄 기록장</p>
                 <div class="flex gap-2">
-                    <input type="text" id="det-thought" placeholder="예: 갯벌이 넓어서 조개잡이를 하면 정말 재밌을 것 같다." class="flex-1 p-2 bg-white border border-teal-200 rounded-lg text-sm focus:outline-teal-500">
-                    <button onclick="app.saveThought()" class="bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-lg text-xs font-bold shrink-0">생각 저장</button>
+                    <input type="text" id="det-thought" placeholder="이곳에서 느낀 점을 짧게 적어보세요." class="flex-1 p-2 border rounded-lg text-sm">
+                    <button onclick="app.saveThought()" class="bg-teal-700 text-white px-4 py-2 rounded-lg text-xs font-bold">기록 저장</button>
                 </div>
-            </div>
-
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                <p class="font-bold mb-1.5 text-orange-600 flex items-center gap-1 text-sm">❓ 딩동댕 확인문제</p>
-                <p id="det-quiz" class="font-bold text-slate-800 text-sm mb-2"></p>
-                <div id="det-opts" class="grid grid-cols-2 gap-1.5"></div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="slide-container" id="slide-teacher" style="height:auto; min-height:650px;">
+<div class="slide-container" id="slide-teacher" style="height:auto; min-height:800px;">
     <div class="slide-header">
-        <h2 class="slide-title">📊 [교사용] 학생 실시간 진도 및 느낀 점 모니터링</h2>
-        <button onclick="app.closeTeacherView()" class="bg-slate-800 text-white px-4 py-2 text-sm font-bold rounded-lg">🔒 대시보드 닫기</button>
+        <h2 class="slide-title">📊 실시간 탐사 결과 보고서</h2>
+        <button onclick="app.closeTeacherView()" class="bg-red-600 text-white px-5 py-2 font-bold rounded-lg shadow">🔒 대시보드 닫기</button>
     </div>
     <div class="overflow-x-auto w-full">
-        <table class="w-full text-left border-collapse text-xs">
+        <table class="w-full text-left border-collapse text-[13px]">
             <thead>
-                <tr class="bg-slate-100 text-slate-700 font-bold">
-                    <th class="p-3 border-b w-16">번호</th>
-                    <th class="p-3 border-b w-24">이름</th>
-                    <th class="p-3 border-b w-40">현재 상태</th>
-                    <th class="p-3 border-b w-24">도장 개수</th>
-                    <th class="p-3 border-b w-48">제출 사진 파악</th>
-                    <th class="p-3 border-b">학생들이 적은 고장별 느낀 점</th>
-                    <th class="p-3 border-b w-24">기록 시간</th>
+                <tr class="bg-slate-900 text-white">
+                    <th class="p-3 border-r border-slate-700">번호/이름</th>
+                    <th class="p-3 border-r border-slate-700 text-center">진도</th>
+                    <th class="p-3 border-r border-slate-700">제출한 사진 (미리보기)</th>
+                    <th class="p-3">장소별 느낀 점 기록</th>
                 </tr>
             </thead>
-            <tbody id="student-list" class="text-slate-600 divide-y divide-slate-100">
-                <tr><td colspan="7" class="p-8 text-center text-slate-400">학생 접속을 기다리는 중...</td></tr>
+            <tbody id="student-list" class="divide-y divide-slate-200 bg-white">
+                <tr><td colspan="4" class="p-10 text-center text-slate-400">탐사 대원들이 접속하기를 기다리고 있습니다...</td></tr>
             </tbody>
         </table>
     </div>
@@ -182,6 +177,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, setDoc, onSnapshot, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+    // Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyCS8kWxKMV9qk06wxeEaYnNa9FK652CDsU",
         authDomain: "sahagu-69868.firebaseapp.com",
@@ -192,32 +188,33 @@
         measurementId: "G-35GC10BWF1"
     };
 
+    // 🌟 구글 앱스 스크립트(GAS) 주소 (배포 권한을 '모든 사용자'로 수정한 주소)
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzAVpdjYIrIYFOTHyqDAhAdoFgufoaRm3HmMqvvZumbrDTSnfgqaJSvIb9GEVNptwgi/exec"; 
 
     const app_fb = initializeApp(firebaseConfig);
     const db = getFirestore(app_fb);
 
     const zoneData = {
-        saha: { name: "사하구", img: "DA.jpg", link: "https://www.saha.go.kr", desc: "🌊 다대포 해수욕장: 백사장이 아주 넓고 부드러운 갯벌이 발달하여 신나는 조개잡이 체험을 할 수 있어요.\n🏡 감천문화마을: 앞집이 뒷집을 가리지 않는 계단식 마을로, 예쁜 골목 예술로 유명해요.", quiz: "다대포 해수욕장에 발달해 있어 초등학생들이 조개잡이 체험을 하기 좋은 곳은 어디일까요?", opts: ["자갈밭", "절벽 동굴", "넓은 갯벌", "깊은 바다"], ans: 2 },
-        seo: { name: "서구", img: "SONG.jpg", link: "https://www.bsseogu.go.kr", desc: "🏖️ 송도해수욕장: 우리나라 제 1호 해수욕장 타이틀을 가지고 있어요.\n🚡 구름산책로: 바다 위에 투명한 다리를 놓아 마치 구름 위를 걷듯 출렁이는 파도를 내려다볼 수 있어요.", quiz: "우리나라에서 가장 먼저 만들어진 '제 1호 공설 해수욕장'의 이름은 무엇일까요?", opts: ["해운대해수욕장", "송도해수욕장", "광안리해수욕장", "다대포해수욕장"], ans: 1 },
-        yeongdo: { name: "영도구", img: "TAE.jpg", link: "https://www.yeongdo.go.kr", desc: "⛰️ 태종대: 깎아지른 바위 절벽과 울창한 수목이 바다와 어우러진 신비로운 명소예요.\n🌊 흰여울문화마을: 바다 절벽 끝에 옹기종기 붙은 흰 마을길이 참 아름다워요.", quiz: "영도 가장 남쪽에 위치하며 날씨가 맑으면 대마도까지 보이는 절벽 절경 명소는?", opts: ["금정산성", "용두산공원", "태종대", "초량이바구길"], ans: 2 },
-        jung: { name: "중구", img: "JA.jpg", link: "https://www.bsjunggu.go.kr", desc: "🐟 자갈치시장: 부산 하면 떠오르는 가장 크고 활기찬 생선·수산물 전문 시장이랍니다.\n🗼 용두산공원: 도심 한복판 산 위에 우뚝 솟은 부산타워에서 고장의 경치를 사방으로 둘러봐요.", quiz: "부산을 대표하는 수산물 시장으로 \"오이소, 보이소, 사이소!\"의 외침이 가득한 이곳은?", opts: ["자갈치시장", "국제시장", "부평깡통시장", "초량시장"], ans: 0 },
-        dong: { name: "동구", img: "GAM.jpg", link: "https://www.bsdonggu.go.kr", desc: "🏃‍♂️ 초량 이바구길: 부산항이 내려다보이는 산복도로 동네의 살아있는 역사와 이야기를 담은 계단길이에요.\n💡 168계단: 가파른 옛날 계단 옆으로 주민과 관광객을 위한 모노레일이 움직여요.", quiz: "과거 산복도로 마을의 애환이 서려 있으며, 지금은 모노레일이 설치된 동구의 가파른 계단 수는?", opts: ["100계단", "120계단", "150계단", "168계단"], ans: 3 }
+        saha: { name: "사하구", img: "DA.jpg", link: "https://www.saha.go.kr", desc: "🌊 다대포 해수욕장: 백사장이 넓어 부드러운 갯벌 체험을 할 수 있으며 노을이 아름답습니다.\n🏡 감천문화마을: 산자락을 따라 알록달록 늘어선 계단식 예술 골목이 멋진 고장입니다.", quiz: "다대포 해수욕장에서 초등학생들이 조개잡이를 체험하기 좋은 지형은 무엇일까요?", opts: ["자갈밭", "넓은 갯벌", "동굴 절벽", "깊은 바다"], ans: 1 },
+        seo: { name: "서구", img: "SONG.jpg", link: "https://www.bsseogu.go.kr", desc: "🏖️ 송도 해수욕장: 우리나라 제 1호 해수욕장이라는 역사를 가진 장소입니다.\n🚡 구름산책로: 바다 위에 투명하게 설치된 다리 위를 걸으며 출렁이는 파도를 관찰할 수 있습니다.", quiz: "우리나라에서 가장 먼저 만들어진 '제 1호 공설 해수욕장'의 이름은?", opts: ["해운대", "송도", "광안리", "다대포"], ans: 1 },
+        yeongdo: { name: "영도구", img: "TAE.jpg", link: "https://www.yeongdo.go.kr", desc: "⛰️ 태종대: 기암절벽과 울창한 숲이 어우러져 날씨가 맑으면 대마도까지 보이는 절경 명소입니다.\n🌊 흰여울문화마을: 가파른 벼랑 끝에 옹기종기 모여 있는 흰색 마을길이 아름다운 곳입니다.", quiz: "영도 남쪽 끝에 위치하며, 바다 절벽 경치가 아름다운 명승지는 어디일까요?", opts: ["금정산", "용두산", "태종대", "시민공원"], ans: 2 },
+        jung: { name: "중구", img: "JA.jpg", link: "https://www.bsjunggu.go.kr", desc: "🐟 자갈치시장: 부산의 대표적인 수산물 시장으로, 언제나 싱싱한 수산물이 가득하고 활기가 넘칩니다.\n🗼 용두산공원: 도심 속 산 위에 솟아오른 부산타워에서 고장의 전체 모습을 내려다볼 수 있습니다.", quiz: "부산의 대표적인 생선 및 수산물 시장으로 \"오이소, 보이소, 사이소!\"로 유명한 곳은?", opts: ["국제시장", "자갈치시장", "깡통시장", "초량시장"], ans: 1 },
+        dong: { name: "동구", img: "GAM.jpg", link: "https://www.bsdonggu.go.kr", desc: "🏃‍♂️ 초량 이바구길: 부산항이 내려다보이는 산복도로 동네의 깊은 역사와 삶의 흔적을 담은 길입니다.\n🚠 168계단: 가파르고 높은 옛 계단 옆으로 주민들을 위한 친절한 모노레일이 운행 중입니다.", quiz: "과거 산복도로 고장의 애환이 담겨있으며 모노레일이 설치된 동구의 유명한 계단 수는?", opts: ["100계단", "168계단", "200계단", "300계단"], ans: 1 }
     };
 
     window.app = {
         stKey: "", num: "", name: "", currentZone: "",
         learned: new Set(), unsub: null,
-        thoughts: {}, uploadedFiles: {}, // 고장별 데이터 매칭용 객체
+        thoughts: {}, imageMap: {}, 
 
         start: async function() {
             this.num = document.getElementById('st-num').value.trim();
             this.name = document.getElementById('st-name').value.trim();
             if(!this.num || !this.name) return alert("번호와 이름을 입력하세요.");
             this.stKey = `${this.num.padStart(2,'0')}_${this.name}`;
-            document.getElementById('user-info').innerText = `🧭 ${this.num}번 ${this.name} 탐험가`;
+            document.getElementById('user-info').innerText = `🎖️ 탐험대원: ${this.num}번 ${this.name}`;
             this.showSlide('slide-map');
-            this.updateLMS("지도 대기 중");
+            this.updateLMS("탐사 시작");
         },
 
         showSlide: (id) => {
@@ -225,7 +222,7 @@
             document.getElementById(id).classList.add('active');
         },
 
-        goMap: function() { this.showSlide('slide-map'); this.updateLMS("지도 대기 중"); },
+        goMap: function() { this.showSlide('slide-map'); this.updateLMS("지도 대기"); },
 
         goDetail: function(key) {
             this.currentZone = key;
@@ -234,7 +231,7 @@
             document.getElementById('det-img').src = data.img;
             document.getElementById('det-desc').innerText = data.desc;
             document.getElementById('det-link').href = data.link;
-            document.getElementById('det-thought').value = this.thoughts[key] || ""; // 이전 적은 생각 불러오기
+            document.getElementById('det-thought').value = this.thoughts[key] || "";
             document.getElementById('upload-success').style.display = 'none';
             
             const optsDiv = document.getElementById('det-opts');
@@ -242,87 +239,60 @@
             data.opts.forEach((opt, idx) => {
                 const btn = document.createElement('button');
                 btn.innerText = `${idx+1}. ${opt}`;
-                btn.className = "w-full text-left p-2 border rounded-lg hover:bg-orange-50 font-medium text-slate-700 text-xs transition";
+                btn.className = "w-full text-left p-2 border rounded-lg hover:bg-slate-100 text-xs transition font-medium";
                 btn.onclick = () => this.checkAns(idx);
                 optsDiv.appendChild(btn);
             });
             this.showSlide('slide-detail');
-            this.updateLMS(`${zoneData[key].name} 학습 중`);
+            this.updateLMS(`${data.name} 학습 중`);
         },
 
         checkAns: function(idx) {
-            const data = zoneData[this.currentZone];
-            if(idx === data.ans) {
+            if(idx === zoneData[this.currentZone].ans) {
                 try { new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-84.wav').play(); } catch(e){}
-                alert("🎉 정답입니다! 탐험 도장이 찍혔습니다.");
+                alert("정답! 탐험 도장을 획득했습니다.");
                 this.learned.add(this.currentZone);
-                
-                const badge = document.getElementById(`chk-${this.currentZone}`);
-                badge.innerText = "✅ 탐험 완료";
-                badge.className = "text-sm font-bold text-emerald-600 mt-1";
-                
-                this.updateLMS(`${data.name} 퀴즈 통과`);
-            } else {
-                alert("❌ 다시 한 번 설명판을 읽어보고 풀어볼까요?");
-            }
+                document.getElementById(`chk-${this.currentZone}`).innerText = "✅ 탐험 완료";
+                document.getElementById(`chk-${this.currentZone}`).className = "text-sm font-bold text-teal-600 mt-1";
+                this.updateLMS(`${zoneData[this.currentZone].name} 마스터`);
+            } else { alert("설명판을 다시 한 번 볼까요?"); }
         },
 
-        // 느낀 점 따로 저장하는 기능
-        saveThought: async function() {
-            const text = document.getElementById('det-thought').value.trim();
-            if(!text) return alert("느낀 점을 입력한 후 저장해 주세요!");
-            this.thoughts[this.currentZone] = text;
-            alert("📝 생각이 안전하게 기록되었습니다!");
-            this.updateLMS(`${zoneData[this.currentZone].name} 느낀점 등록`);
+        saveThought: function() {
+            const txt = document.getElementById('det-thought').value.trim();
+            if(!txt) return alert("내용을 적어주세요!");
+            this.thoughts[this.currentZone] = txt;
+            alert("일지에 기록되었습니다.");
+            this.updateLMS(`${zoneData[this.currentZone].name} 소감 기록`);
         },
 
         updateLMS: async function(status) {
             if(!this.stKey) return;
-            await setDoc(doc(db, "seobusan_lms_v3", this.stKey), {
-                num: parseInt(this.num), 
-                name: this.name, 
-                status: status, 
-                count: this.learned.size, 
-                thoughts: this.thoughts,
-                uploadedFiles: this.uploadedFiles,
-                time: new Date().toLocaleTimeString('ko-KR')
+            await setDoc(doc(db, "seobusan_lms_final", this.stKey), {
+                num: parseInt(this.num), name: this.name, status: status, count: this.learned.size,
+                thoughts: this.thoughts, imageMap: this.imageMap, time: new Date().toLocaleTimeString('ko-KR')
             }, { merge: true });
         },
 
-        // 📸 캡처 오류 완전 해결 버전
         captureAndUpload: async function() {
             const btn = document.querySelector('.btn-capture');
-            btn.innerText = "📸 캡처 진행 중...";
+            btn.innerText = "📸 캡처하여 일지 전송 중...";
             btn.disabled = true;
 
             const activeSlide = document.querySelector('.slide-container.active');
-            
-            // html2canvas 옵션을 꼼꼼하게 채워 외부 이미지 차단 버그 해결
-            html2canvas(activeSlide, { 
-                scale: 1, 
-                logging: false, 
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: "#ffffff"
-            }).then(canvas => {
+            html2canvas(activeSlide, { useCORS: true, logging: false }).then(canvas => {
                 canvas.toBlob(blob => {
                     if(blob) {
-                        const file = new File([blob], `${this.stKey}_${this.currentZone}_캡처.png`, { type: "image/png" });
+                        const file = new File([blob], `${this.stKey}_${this.currentZone}.png`, { type: "image/png" });
                         this.handleFile(file);
                     }
-                    btn.innerText = "📸 현재 화면 캡처 및 자동 올리기";
+                    btn.innerText = "📸 현재 이 화면 캡처하여 일지에 올리기";
                     btn.disabled = false;
                 });
-            }).catch(err => {
-                console.error(err);
-                alert("서버 연결 대기 중입니다. 다시 한 번 버튼을 눌러보세요!");
-                btn.innerText = "📸 현재 화면 캡처 및 자동 올리기";
-                btn.disabled = false;
             });
         },
 
         handleFile: async function(file) {
-            if(!file) return;
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const base64Data = e.target.result.split(',')[1];
@@ -330,80 +300,82 @@
 
                 try {
                     const response = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
-                    const result = await response.json();
-                    if(result.result === "success") {
+                    const res = await response.json();
+                    if(res.result === "success") {
                         document.getElementById('upload-success').style.display = 'flex';
-                        this.uploadedFiles[this.currentZone] = file.name; // 파일명 기록
-                        this.updateLMS(`${zoneData[this.currentZone].name} 파일 전송 완료`);
+                        this.imageMap[this.currentZone] = res.url; 
+                        this.updateLMS(`${zoneData[this.currentZone].name} 인증 완료`);
                     }
-                } catch (err) {
-                    alert("구글 드라이브와 전송 지연이 발생했습니다. 잠시 후 다시 올려주세요.");
-                }
+                } catch (err) { alert("서버 대기 중입니다. 구글 배포 설정을 확인하세요."); }
             };
             reader.readAsDataURL(file);
         },
 
         checkTeacherPassword: function() {
-            const password = prompt("교사 인증 비밀번호를 입력해 주세요.");
-            if (password === "1532") {
-                this.toggleTeacherView();
-            } else if (password !== null) {
-                alert("❌ 비밀번호가 올바르지 않습니다.");
-            }
+            const pw = prompt("교사 비밀번호(4자리)를 입력하세요.");
+            if(pw === "1532") this.toggleTeacherView();
+            else if(pw !== null) alert("비밀번호가 틀렸습니다.");
+        },
+
+        // 구글 드라이브 원본 주소를 웹 앱 미리보기 썸네일 전용 주소로 자동 포맷 변환
+        convertDriveLink: (url) => {
+            if(!url) return "";
+            return url.replace("/file/d/", "/uc?export=view&id=").replace("/view?usp=drivesdk", "").replace("/view", "");
         },
 
         toggleTeacherView: function() {
             this.showSlide('slide-teacher');
-            const q = query(collection(db, "seobusan_lms_v3"), orderBy("num", "asc"));
-            this.unsub = onSnapshot(q, (snapshot) => {
+            const q = query(collection(db, "seobusan_lms_final"), orderBy("num", "asc"));
+            this.unsub = onSnapshot(q, (sn) => {
                 const tbody = document.getElementById('student-list');
                 tbody.innerHTML = '';
-                if(snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">학습 중인 학생이 없습니다.</td></tr>`;
-                    return;
-                }
-                snapshot.forEach((doc) => {
+                if(sn.empty) return tbody.innerHTML = "<tr><td colspan='4' class='p-10 text-center'>대원 대기 중...</td></tr>";
+                
+                sn.forEach((doc) => {
                     const d = doc.data();
                     const row = document.createElement('tr');
-                    row.className = "border-b hover:bg-slate-50 text-[11px] transition";
+                    row.className = "border-b hover:bg-slate-50 transition";
                     
-                    // 생각 데이터 추출기
-                    let thoughtSummary = [];
-                    if(d.thoughts) {
-                        for(let k in d.thoughts) { thoughtSummary.push(`[${k}] ${d.thoughts[k]}`); }
+                    // 대시보드 썸네일 이미지 출력
+                    let imgHtml = "";
+                    if(d.imageMap) {
+                        for(let k in d.imageMap) {
+                            const directUrl = this.convertDriveLink(d.imageMap[k]);
+                            imgHtml += `<div class='inline-block m-1 text-center'>
+                                            <img src='${directUrl}' class='thumb-img' onclick='window.open("${d.imageMap[k]}")' alt='인증샷'>
+                                            <div class='text-[9px] text-slate-400 font-bold'>${k}</div>
+                                        </div>`;
+                        }
                     }
-                    // 사진 데이터 추출기
-                    let fileSummary = [];
-                    if(d.uploadedFiles) {
-                        for(let k in d.uploadedFiles) { fileSummary.push(`📂 ${d.uploadedFiles[k]}`); }
+
+                    // 느낀 점 출력
+                    let thoughtHtml = "";
+                    if(d.thoughts) {
+                        for(let k in d.thoughts) {
+                            thoughtHtml += `<div class='mb-1'><span class='font-bold text-teal-700'>[${k}]</span> ${d.thoughts[k]}</div>`;
+                        }
                     }
 
                     row.innerHTML = `
-                        <td class="p-3 font-bold">${d.num}번</td>
-                        <td class="p-3 font-semibold">${d.name}</td>
-                        <td class="p-3 text-slate-500">${d.status}</td>
-                        <td class="p-3 font-bold text-emerald-600">${d.count} 개 완료</td>
-                        <td class="p-3 text-blue-600 font-medium">${fileSummary.join('<br>') || '-'}</td>
-                        <td class="p-3 font-medium text-slate-700 whitespace-pre-line">${thoughtSummary.join('\n') || '-'}</td>
-                        <td class="p-3 text-slate-400">${d.time}</td>
+                        <td class='p-3 border-r'><span class='font-bold text-base'>${d.num}번</span><br>${d.name}</td>
+                        <td class='p-3 border-r text-center'><span class='text-teal-600 font-bold text-base'>${d.count}/5</span><br><span class='text-slate-400 text-[10px]'>${d.status}</span></td>
+                        <td class='p-3 border-r'>${imgHtml || "-"}</td>
+                        <td class='p-3 font-medium text-slate-700'>${thoughtHtml || "-"}</td>
                     `;
                     tbody.appendChild(row);
                 });
             });
         },
 
-        closeTeacherView: function() {
-            if (this.unsub) this.unsub();
+        closeTeacherView: function() { 
+            if(this.unsub) this.unsub();
             this.stKey ? this.showSlide('slide-map') : this.showSlide('slide-login');
         }
     };
 
     window.addEventListener('paste', (e) => {
         const item = e.clipboardData.items[0];
-        if (item && item.type.indexOf('image') !== -1) {
-            const blob = item.getAsFile();
-            app.handleFile(blob);
-        }
+        if (item && item.type.indexOf('image') !== -1) app.handleFile(item.getAsFile());
     });
 </script>
 </body>
