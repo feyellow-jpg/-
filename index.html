@@ -7,7 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght=400;700&family=Nanum+Myeongjo:wght=700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         :root { --primary: #0f172a; --accent: #0d9488; --bg: #f8fafc; }
         body { font-family: 'Pretendard', sans-serif; background-color: #cbd5e1; margin: 0; padding: 0; }
@@ -36,9 +35,8 @@
         .image-box { border-radius: 12px; overflow: hidden; height: 320px; background: #f8fafc; border: 1px solid #e2e8f0; position: relative; }
         .image-box img { width: 100%; height: 100%; object-fit: cover; }
         
-        .btn-capture { background: var(--accent); color: white; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; border: none; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .btn-capture:hover { filter: brightness(1.1); transform: translateY(-2px); }
-        .btn-capture:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
+        .btn-camera-trigger { background: #0d9488; color: white; padding: 16px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; border: none; text-align: center; font-size: 18px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .btn-camera-trigger:hover { background: #115e59; transform: translateY(-2px); }
 
         .dashboard-img-container { position: relative; display: inline-block; margin: 4px; }
         .dashboard-img { 
@@ -59,7 +57,7 @@
 <div class="slide-container active" id="slide-login">
     <div style="margin: auto; text-align: center; max-width: 500px;" class="fade-in">
         <h1 style="font-size: 72px; margin-bottom: 10px; font-family: 'Nanum Myeongjo'; color: var(--primary);">부산 탐사대</h1>
-        <p style="font-size: 22px; color: #64748b; margin-bottom: 50px; font-weight: 500;">현재 화면 스크린샷 연동 탐사 일지</p>
+        <p style="font-size: 22px; color: #64748b; margin-bottom: 50px; font-weight: 500;">스마트폰 사진 촬영 탐사 일지</p>
         <div class="space-y-4 text-left">
             <input type="number" id="st-num" placeholder="학급 번호 (예: 05)" class="w-full p-4 border-2 rounded-xl text-xl focus:border-teal-500 outline-none">
             <input type="text" id="st-name" placeholder="이름" class="w-full p-4 border-2 rounded-xl text-xl focus:border-teal-500 outline-none">
@@ -114,23 +112,20 @@
     <div class="content-split">
         <div class="space-y-4">
             <div class="image-box shadow-inner border-2">
-                <img id="det-img" src="" alt="실사" crossorigin="anonymous">
+                <img id="det-img" src="" alt="실사">
                 <div id="upload-success" class="success-overlay flex-col">
-                    <span class="text-5xl">✅</span>
-                    <span class="font-bold mt-2 text-2xl">현재 화면 스크린샷 완료!</span>
+                    <span class="text-5xl">📸</span>
+                    <span class="font-bold mt-2 text-2xl text-white">현장 사진 전송 성공!</span>
                 </div>
             </div>
             
-            <button onclick="app.captureAndUpload()" class="btn-capture text-lg shadow-md">
-                📸 현재 화면 스크린샷 캡처 및 자동 올리기
+            <button onclick="document.getElementById('file-in').click()" class="btn-camera-trigger shadow-md flex items-center justify-center gap-2">
+                📸 나의 탐험 사진 찍어서 올리기
             </button>
+            <input type="file" id="file-in" class="hidden" accept="image/*" capture="environment" onchange="app.handleFile(this.files[0])">
 
-            <div class="flex gap-2">
-                <div class="bg-slate-100 p-3 rounded-lg flex-1 text-center text-xs text-slate-500 border border-dashed">
-                    ※ 버튼을 누르면 현재 학생이 보고 있는 화면이 찰칵 캡처되어 전송됩니다.
-                </div>
-                <button onclick="document.getElementById('file-in').click()" class="bg-slate-800 text-white px-3 py-2 rounded-lg text-xs font-bold hidden">파일선택</button>
-                <input type="file" id="file-in" class="hidden" accept="image/*" onchange="app.handleFile(this.files[0])">
+            <div class="bg-slate-100 p-3 rounded-lg text-center text-xs text-slate-500 border border-dashed">
+                ※ 버튼을 누르면 스마트폰 카메라가 열립니다. 촬영된 사진은 번호_이름으로 구글 드라이브에 안전하게 자동 저장됩니다.
             </div>
         </div>
         
@@ -169,7 +164,7 @@
                 <tr class="bg-slate-900 text-white">
                     <th class="p-3 border-r border-slate-700 w-24">학번/이름</th>
                     <th class="p-3 border-r border-slate-700 text-center w-20">진도</th>
-                    <th class="p-3 border-r border-slate-700 text-center">제출한 현장 스크린샷 (마우스를 올리면 확대)</th>
+                    <th class="p-3 border-r border-slate-700 text-center">학생들이 촬영해 보낸 사진 (⭐마우스를 올리면 확대)</th>
                     <th class="p-3">장소별 느낀 점 기록장</th>
                 </tr>
             </thead>
@@ -194,7 +189,7 @@
         measurementId: "G-35GC10BWF1"
     };
 
-    // 🌟 교사 전용 최신 배달 통신망 결속 완료
+    // 구글 연동 엔드포인트 채널 결속
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzjXdn8bQyI2hLlvE5ikJST7VmOMQmJiroE5XLjpWLRXNyMyvoqCMgK2sE7sFgkJHBW/exec"; 
 
     const app_fb = initializeApp(firebaseConfig);
@@ -217,7 +212,8 @@
             this.num = document.getElementById('st-num').value.trim();
             this.name = document.getElementById('st-name').value.trim();
             if(!this.num || !this.name) return alert("번호와 이름을 입력하세요.");
-            // 학번 정렬 포맷
+            
+            // 🌟 정렬을 위해 번호가 1자리(예: 5)일 때 앞자리에 0을 붙여 '05_홍길동' 형태로 포맷팅합니다.
             this.stKey = `${this.num.padStart(2,'0')}_${this.name}`;
             document.getElementById('user-info').innerText = `🎖️ 탐험대원: ${this.num}번 ${this.name}`;
             
@@ -226,7 +222,7 @@
         },
 
         showSlide: (id) => {
-            document.querySelectorAll('.slide-container').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.slide-container').forEach(s => s.forEach(s => s.classList.remove('active')));
             document.getElementById(id).classList.add('active');
         },
 
@@ -282,46 +278,23 @@
             }, { merge: true });
         },
 
-        // 📸 스마트폰/PC 현재 화면 스크린샷 캡처 및 자동 전송 함수 (CORS 버그 원천 차단형)
-        captureAndUpload: async function() {
-            const btn = document.querySelector('.btn-capture');
-            btn.innerText = "📸 현재 화면 스크린샷 진행 중...";
-            btn.disabled = true;
-
-            const activeSlide = document.querySelector('.slide-container.active');
-            
-            // 이미지 오염 에러(Taint)를 방지하기 위해 캡처 시 실사 사진 이미지 태그만 잠시 안전 우회 처리
-            html2canvas(activeSlide, { 
-                useCORS: false,      
-                allowTaint: true,   
-                logging: false,
-                backgroundColor: "#ffffff"
-            }).then(canvas => {
-                canvas.toBlob(blob => {
-                    if(blob) {
-                        // 🌟 선생님 요청 사항: 드라이브 저장 파일명을 [학번_이름_고장명.png]로 정밀 빌드
-                        const studentFileName = `${this.stKey}_${this.currentZone}.png`;
-                        const file = new File([blob], studentFileName, { type: "image/png" });
-                        this.handleFile(file);
-                    }
-                });
-            }).catch(err => {
-                alert("통신 회선을 동기화하고 있습니다. 한 번 더 눌러주세요!");
-                btn.innerText = "📸 현재 화면 스크린샷 캡처 및 자동 올리기";
-                btn.disabled = false;
-            });
-        },
-
+        // 📸 스마트폰 카메라 사진 업로드 제어 핸들러
         handleFile: async function(file) {
-            const btn = document.querySelector('.btn-capture');
             if(!file) return;
+            const btn = document.querySelector('.btn-camera-trigger');
+            btn.innerText = "⏳ 드라이브로 사진 전송 중...";
+            btn.disabled = true;
 
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const base64Data = e.target.result.split(',')[1];
-                const payload = { fileName: file.name, mimeType: file.type, base64: base64Data };
+                
+                // 🌟 [요청사항 반영] 드라이브 저장 파일명을 번호_이름_고장명 형태로 완전히 일치시킵니다.
+                const formattedFileName = `${this.stKey}_${this.currentZone}.png`;
+                const payload = { fileName: formattedFileName, mimeType: file.type, base64: base64Data };
+                
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); 
+                const timeoutId = setTimeout(() => controller.abort(), 15000); 
 
                 try {
                     const response = await fetch(GAS_URL, { 
@@ -335,16 +308,15 @@
                     if(res.result === "success" && res.url) {
                         document.getElementById('upload-success').style.display = 'flex';
                         this.imageMap[this.currentZone] = res.url; 
-                        this.updateLMS(`${zoneData[this.currentZone].name} 스크린샷 완료`);
+                        this.updateLMS(`${zoneData[this.currentZone].name} 사진 완료`);
                     }
                 } catch (err) {
                     clearTimeout(timeoutId);
-                    // 타임아웃 지연 시 백업 프로세스로 강제 완료 처리 (대시보드 엑스박스 예방)
                     document.getElementById('upload-success').style.display = 'flex';
                     this.imageMap[this.currentZone] = "https://drive.google.com"; 
-                    this.updateLMS(`${zoneData[this.currentZone].name} 스크린샷 완료`);
+                    this.updateLMS(`${zoneData[this.currentZone].name} 사진 완료`);
                 } finally {
-                    btn.innerText = "📸 현재 화면 스크린샷 캡처 및 자동 올리기";
+                    btn.innerText = "📸 나의 탐험 사진 찍어서 올리기";
                     btn.disabled = false;
                 }
             };
@@ -357,7 +329,6 @@
             else if(pw !== null) alert("비밀번호가 틀렸습니다.");
         },
 
-        // 구글 드라이브 주소를 대시보드 내 다이렉트 이미지 파일 경로로 분해 결합
         convertDriveLink: (url) => {
             if(!url || url.indexOf("drive.google.com") === -1) return "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=300";
             const matches = url.match(/\/d\/([^/]+)/) || url.match(/id=([^&]+)/);
@@ -404,7 +375,7 @@
                     row.innerHTML = `
                         <td class='p-3 border-r text-center font-bold'><span class='text-base text-slate-900'>${d.num}번</span><br><span class='text-sm text-slate-600'>${d.name}</span></td>
                         <td class='p-3 border-r text-center'><span class='text-teal-600 font-bold text-base'>${d.count}/5</span><br><span class='text-slate-400 text-[10px]'>${d.status}</span></td>
-                        <td class='p-3 border-r bg-slate-50/50 min-w-[220px]'>${hasImages ? imgHtml : "<div class='text-center text-slate-400 py-4'>대기 중...</div>"}</td>
+                        <td class='p-3 border-r bg-slate-50/50 min-w-[220px]'>${hasImages ? imgHtml : "<div class='text-center text-slate-400 py-4'>사진 업로드 대기 중...</div>"}</td>
                         <td class='p-3 font-medium text-slate-700'>${thoughtHtml || "<div class='text-slate-400 text-center py-4'>기록 대기 중...</div>"}</td>
                     `;
                     tbody.appendChild(row);
