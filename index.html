@@ -3,83 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>서부산 탐험대 LMS 시스템</title>
+    <title>우리 고장 부산 지도 탐험대</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f1f5f9; }
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f8fafc; }
         .hidden { display: none; }
+        /* 지도 구역별 맞춤 색상 스타일 */
+        .zone-saha { background-color: #fef08a; border-color: #eab308; } /* 노랑 */
+        .zone-seo { background-color: #bfdbfe; border-color: #3b82f6; }  /* 파랑 */
+        .zone-yeongdo { background-color: #bbf7d0; border-color: #22c55e; } /* 초록 */
+        .zone-jung { background-color: #fed7aa; border-color: #f97316; }  /* 주황 */
+        .zone-dong { background-color: #fbcfe8; border-color: #ec4899; }  /* 핑크 */
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4 max-w-5xl mx-auto">
 
-    <div class="max-w-4xl mx-auto">
+    <div id="login-screen" class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md mx-auto mt-20">
+        <h1 class="text-3xl font-extrabold text-blue-600 mb-2">🗺️ 부산 고장 탐험대</h1>
+        <p class="text-gray-500 mb-8 text-sm font-medium">지도를 누르며 우리 고장의 명소를 생생하게 공부해요!</p>
+        <div class="space-y-4">
+            <input type="number" id="student-num" placeholder="학급 번호 (예: 3)" class="w-full p-4 border-2 border-slate-200 rounded-xl focus:outline-blue-500 text-lg">
+            <input type="text" id="student-name" placeholder="이름 (예: 김부산)" class="w-full p-4 border-2 border-slate-200 rounded-xl focus:outline-blue-500 text-lg">
+            <button onclick="startExploration()" class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold text-lg hover:bg-blue-700 shadow-md transition">지도 탐험 시작하기</button>
+        </div>
+        <div class="mt-8 pt-4 border-t border-gray-100 text-right">
+            <button onclick="toggleTeacherView()" class="text-xs text-slate-400 hover:underline">교사 대시보드 열기</button>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4">
         
-        <div id="login-screen" class="bg-white p-6 rounded-2xl shadow-md text-center max-w-md mx-auto">
-            <h1 class="text-2xl font-bold text-blue-600 mb-2">🧭 날아라! 서부산 탐험대</h1>
-            <p class="text-gray-500 mb-6 text-sm">우리 고장 부산을 재미있게 공부해봅시다!</p>
-            <div class="space-y-4">
-                <input type="number" id="student-num" placeholder="번호 (예: 5)" class="w-full p-3 border rounded-xl focus:outline-blue-500">
-                <input type="text" id="student-name" placeholder="이름 (예: 홍길동)" class="w-full p-3 border rounded-xl focus:outline-blue-500">
-                <button onclick="startLearning()" class="w-full bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700 transition">탐험 시작하기</button>
-            </div>
-            <div class="mt-6 pt-4 border-t border-gray-100 text-right">
-                <button onclick="toggleTeacherView()" class="text-xs text-gray-400 hover:underline">교사 대시보드 보기</button>
-            </div>
-        </div>
-
-        <div id="quiz-screen" class="bg-white p-6 rounded-2xl shadow-md max-w-xl mx-auto hidden">
-            <div class="flex justify-between items-center mb-4 text-sm text-gray-500">
-                <span id="student-info" class="font-bold text-blue-600"></span>
-                <span id="progress">문제 1 / 5</span>
-            </div>
-            <div id="quiz-icon" class="text-5xl my-4 text-center">🏝️</div>
-            <div id="question" class="text-lg font-bold mb-6 text-gray-800">질문이 이곳에 표시됩니다.</div>
-            <div id="options" class="grid grid-cols-1 gap-3">
-                </div>
-            <div id="feedback" class="mt-4 text-center font-bold text-lg h-6"></div>
-        </div>
-
-        <div id="result-screen" class="bg-white p-6 rounded-2xl shadow-md text-center max-w-md mx-auto hidden">
-            <h1 class="text-2xl font-bold text-orange-500 mb-2">🎉 탐험 완료!</h1>
-            <p class="text-gray-600">서부산 탐험 점수를 기록했습니다.</p>
-            <div id="score" class="text-5xl font-extrabold text-orange-500 my-6">0점</div>
-            <p id="comment" class="text-gray-700 font-medium mb-6">참 잘했어요!</p>
-            <button onclick="location.reload()" class="bg-gray-500 text-white px-6 py-2 rounded-xl">처음으로 돌아가기</button>
-        </div>
-
-        <div id="teacher-dashboard" class="bg-white p-6 rounded-2xl shadow-md mt-10 hidden">
-            <div class="flex justify-between items-center mb-6 pb-4 border-b">
-                <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">📊 실시간 서부산 학습 관찰 대시보드</h2>
-                <button onclick="toggleTeacherView()" class="text-sm bg-gray-200 text-gray-700 px-3 py-1 rounded-lg">닫기</button>
+        <div class="lg:col-span-7 bg-white p-6 rounded-2xl shadow-md border border-slate-100">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-slate-800">📍 탐험하고 싶은 구를 선택하세요!</h2>
+                <span id="student-display" class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full"></span>
             </div>
             
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-100 text-gray-700 text-sm font-semibold">
-                            <th class="p-3 border-b">번호</th>
-                            <th class="p-3 border-b">이름</th>
-                            <th class="p-3 border-b">현재 진행 상태</th>
-                            <th class="p-3 border-b">현재 점수</th>
-                            <th class="p-3 border-b">최근 업데이트 시간</th>
-                        </tr>
-                    </thead>
-                    <tbody id="student-list" class="text-sm text-gray-600">
-                        <tr>
-                            <td colspan="5" class="p-4 text-center text-gray-400">접속한 학생이 아직 없습니다.</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="grid grid-cols-3 gap-4 bg-slate-50 p-6 rounded-xl border border-slate-200 h-[400px] content-center">
+                <div class="invisible"></div>
+                <button onclick="selectZone('dong')" class="zone-dong border-2 p-6 rounded-2xl font-bold text-lg shadow hover:scale-105 transition flex flex-col items-center justify-center gap-1">
+                    <span>동구</span><span class="text-xs font-normal text-slate-600">초량 이바구길</span>
+                </button>
+                <div class="invisible"></div>
+
+                <button onclick="selectZone('saha')" class="zone-saha border-2 p-6 rounded-2xl font-bold text-lg shadow hover:scale-105 transition flex flex-col items-center justify-center gap-1 row-span-2">
+                    <span>사하구</span><span class="text-xs font-normal text-slate-600">다대포 / 감천</span>
+                </button>
+                <button onclick="selectZone('seo')" class="zone-seo border-2 p-6 rounded-2xl font-bold text-lg shadow hover:scale-105 transition flex flex-col items-center justify-center gap-1">
+                    <span>서구</span><span class="text-xs font-normal text-slate-600">송도 구름산책로</span>
+                </button>
+                <button onclick="selectZone('jung')" class="zone-jung border-2 p-6 rounded-2xl font-bold text-lg shadow hover:scale-105 transition flex flex-col items-center justify-center gap-1">
+                    <span>중구</span><span class="text-xs font-normal text-slate-600">자갈치 시장</span>
+                </button>
+
+                <div class="invisible"></div>
+                <button onclick="selectZone('yeongdo')" class="zone-yeongdo border-2 p-6 rounded-2xl font-bold text-lg shadow hover:scale-105 transition flex flex-col items-center justify-center gap-1">
+                    <span>영도구</span><span class="text-xs font-normal text-slate-600">태종대 / 흰여울</span>
+                </button>
             </div>
+            <p class="text-xs text-center text-slate-400 mt-4">※ 실제 고장의 지리적 인접 위치를 기반으로 배치된 교육용 지도식 UI입니다.</p>
         </div>
 
+        <div class="lg:col-span-5 bg-white p-6 rounded-2xl shadow-md border border-slate-100 flex flex-col justify-between">
+            <div id="intro-box">
+                <div class="text-center py-20 text-slate-400 font-medium">
+                    <span class="text-5xl block mb-4">👀</span>
+                    왼쪽 지도에서 공부하고 싶은 고장을 누르면 생생한 사진과 설명이 나타납니다!
+                </div>
+            </div>
+
+            <div id="detail-box" class="hidden">
+                <div class="flex items-center gap-2 mb-3">
+                    <span id="place-tag" class="text-xs font-bold uppercase px-2.5 py-1 rounded-full text-white">동구</span>
+                    <h3 id="place-name" class="text-2xl font-extrabold text-slate-800">장소 이름</h3>
+                </div>
+                
+                <div class="w-full h-52 bg-slate-100 rounded-xl overflow-hidden mb-4 border border-slate-200">
+                    <img id="place-img" src="" alt="고장 사진" class="w-full h-full object-cover">
+                </div>
+
+                <p id="place-desc" class="text-slate-600 leading-relaxed text-sm md:text-base bg-slate-50 p-4 rounded-xl border border-slate-100 mb-4 whitespace-pre-line">
+                    장소에 대한 자세한 초등학교 3학년 맞춤형 설명이 들어갑니다.
+                </p>
+
+                <button onclick="markAsLearned()" class="w-full bg-emerald-500 text-white font-bold py-3 rounded-xl hover:bg-emerald-600 shadow transition flex items-center justify-center gap-2">
+                    ✅ 이 고장 학습 완료하기
+                </button>
+            </div>
+            
+            <div class="mt-6 pt-4 border-t border-slate-100">
+                <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                    <span>나의 탐험 진척도</span>
+                    <span id="progress-text">0 / 5 구역 완료</span>
+                </div>
+                <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="teacher-dashboard" class="bg-white p-6 rounded-2xl shadow-xl mt-8 border border-slate-200 hidden">
+        <div class="flex justify-between items-center mb-6 pb-4 border-b">
+            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">📊 [교사용] 실시간 고장지도 학습 관찰 대시보드</h2>
+            <button onclick="toggleTeacherView()" class="text-sm bg-slate-200 text-slate-700 px-3 py-1 rounded-lg hover:bg-slate-300">닫기</button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 text-slate-700 text-sm font-semibold">
+                        <th class="p-3 border-b">번호</th>
+                        <th class="p-3 border-b">이름</th>
+                        <th class="p-3 border-b">현재 읽고 있는 지역</th>
+                        <th class="p-3 border-b">학습 완료한 구역 수</th>
+                        <th class="p-3 border-b">최근 확인 시간</th>
+                    </tr>
+                </thead>
+                <tbody id="student-list" class="text-sm text-slate-600">
+                    <tr><td colspan="5" class="p-4 text-center text-slate-400">학습 중인 학생이 없습니다.</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 쌤이 보내주신 실제 사하구 프로젝트 설정값 반영 완료! 🚀
+        // 쌤의 파이어베이스 프로젝트 정보 연동
         const firebaseConfig = {
             apiKey: "AIzaSyCS8kWxKMV9qk06wxeEaYnNa9FK652CDsU",
             authDomain: "sahagu-69868.firebaseapp.com",
@@ -90,146 +141,140 @@
             measurementId: "G-35GC10BWF1"
         };
 
-        // Firebase 초기화
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 퀴즈 데이터 정의
-        const quizData = [
-            { question: "낙동강과 바다가 만나는 곳에 만들어진 모래섬으로, 철새들이 찾아오는 서부산의 대표적인 자연 보호 구역은?", options: ["을숙도", "영도", "오륙도", "해운대"], answer: 0, icon: "🦆" },
-            { question: "강서구에 위치한 곳으로, 옛날 가야의 수로왕과 허왕후가 만났다는 전설이 깃든 산은?", options: ["금정산", "황령산", "오봉산", "분산"], answer: 2, icon: "⛰️" },
-            { question: "사하구에 있는 마을로, 알록달록한 집들이 모여 있어 '부산의 마추픽추'라고 불리는 곳은?", options: ["흰여울문화마을", "감천문화마을", "초량이바구길", "청학동마을"], answer: 1, icon: "🏡" },
-            { question: "사하구 다대동에 위치하여 백사장과 넓은 갯벌 체험, 낙조(노을) 분수 쇼가 유명한 해수욕장은?", options: ["송정해수욕장", "광안리해수욕장", "송도해수욕장", "다대포해수욕장"], answer: 3, icon: "🌅" },
-            { question: "사상구에 있는 넓은 공원으로, 삼락생태공원과 함께 시민들의 쉼터가 되며 봄철 벚꽃길로 유명한 곳은?", options: ["삼락생태공원", "시민공원", "어린이대공원", "용두산공원"], answer: 0, icon: "🌸" }
-        ];
+        // 초3 지역화 맞춤형 학습 데이터 콘텐츠 (생생한 사진 링크 포함)
+        const zoneData = {
+            saha: {
+                name: "사하구 (다대포 & 감천마을)",
+                tagColor: "bg-yellow-500",
+                img: "https://images.unsplash.com/photo-1620127252536-03bdfcf6d5c3?auto=format&fit=crop&w=600&q=80", // 다대포 노을 대용 고화질 이미지
+                desc: "🌊 다대포 해수욕장: 낙동강과 바다가 만나는 곳에 넓은 백사장이 펄쳐져 있어요. 갯벌에서 조개잡이 체험을 할 수 있고, 저녁에는 멋진 노을과 음악분수 쇼가 열려요!\n\n🏡 감천문화마을: 산자락을 따라 알록달록한 예쁜 집들이 계단처럼 늘어선 마을이에요. 골목길 곳곳에 예쁜 그림과 어린왕자 동상이 있어 많은 사람들이 찾아요."
+            },
+            seo: {
+                name: "서구 (송도해수욕장)",
+                tagColor: "bg-blue-500",
+                img: "https://images.unsplash.com/photo-1596120244118-193353ef4969?auto=format&fit=crop&w=600&q=80", // 송도 바다/케이블카 대용
+                desc: "🏖️ 송도해수욕장: 우리나라에서 가장 먼저 만들어진 공설 해수욕장이에요!\n\n🚡 송도해상케이블카 & 구름산책로: 바다 위를 둥둥 떠다니는 케이블카를 타면 짜릿한 바다 풍경을 볼 수 있어요. 바다 위에 설치된 투명한 구름산책로를 걸으면 마치 바다 위를 걷는 기분이 든답니다."
+            },
+            yeongdo: {
+                name: "영도구 (태종대 & 흰여울마을)",
+                tagColor: "bg-green-500",
+                img: "https://images.unsplash.com/photo-1616388417937-2fb0fae2496a?auto=format&fit=crop&w=600&q=80", // 영도 흰여울 대용
+                desc: "⛰️ 태종대: 영도의 가장 남쪽에 있는 아름다운 울창한 숲과 깎아지른 듯한 바위 절벽이 펼쳐진 곳이에요. 맑은 날에는 저 멀리 바다 건너 일본의 대마도까지 보여요.\n\n🌊 흰여울문화마을: 바다 바로 옆 절벽 위에 하얀 골목길과 집들이 모여 있어 포토존으로 아주 유명한 아름다운 마을이에요."
+            },
+            jung: {
+                name: "중구 (자갈치시장 & BIFF광장)",
+                tagColor: "bg-orange-500",
+                img: "https://images.unsplash.com/photo-1534482421-64566f976cfa?auto=format&fit=crop&w=600&q=80", // 한국 시장 어시장 대용
+                desc: "🐟 자갈치시장: \"오이소! 보이소! 사이소!\" 부산을 대표하는 활기찬 가장 큰 수산물 시장이에요. 은빛 갈치, 싱싱한 문어와 고등어 등 바다에서 갓 잡아 올린 수산물이 가득해요!\n\n🍿 용두산공원: 높은 부산타워가 솟아있어 중구와 부산항 바다 풍경을 사방으로 시원하게 내려다볼 수 있어요."
+            },
+            dong: {
+                name: "동구 (초량 이바구길 & 부산역)",
+                tagColor: "bg-pink-500",
+                img: "https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80", // 산복도로/도시 계단 대용
+                desc: "🚂 부산역: 다른 고장에서 기차를 타고 부산으로 올 때 처음 만나는 교통의 중심지에요.\n\n🏃‍♂️ 초량 이바구길: 옛날 산동네 사람들의 삶의 이야기가 가득 담긴 길이에요. 아찔하게 높은 '168계단'과, 어르신들이 수동으로 움직여주시는 신기한 모노레일을 직접 타보며 과거 여행을 할 수 있어요."
+            }
+        };
 
-        let currentQuestionIndex = 0;
-        let score = 0;
         let studentKey = "";
         let studentName = "";
         let studentNum = "";
+        let currentSelectedZone = "";
+        let learnedZones = new Set(); // 학습을 완료한 구역 보관함
 
-        // 함수 전역 등록 (HTML onclick 연동용)
-        window.startLearning = startLearning;
+        window.startExploration = startExploration;
+        window.selectZone = selectZone;
+        window.markAsLearned = markAsLearned;
         window.toggleTeacherView = toggleTeacherView;
 
-        // 1. 학생 로그인 및 데이터베이스 초기화 등록
-        async function startLearning() {
+        // 1. 학생 등록 후 메인 화면 진입
+        async function startExploration() {
             studentNum = document.getElementById('student-num').value.trim();
             studentName = document.getElementById('student-name').value.trim();
 
             if (!studentNum || !studentName) {
-                alert("번호와 이름을 모두 입력해 주세요!");
+                alert("번호와 이름을 모두 적어주세요!");
                 return;
             }
 
-            const paddedNum = studentNum.padStart(2, '0');
-            studentKey = `${paddedNum}_${studentName}`;
-
+            studentKey = `${studentNum.padStart(2, '0')}_${studentName}`;
+            
             document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('quiz-screen').classList.remove('hidden');
-            document.getElementById('student-info').innerText = `${studentNum}번 ${studentName} 탐험가`;
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('student-display').innerText = `🧭 ${studentNum}번 ${studentName} 탐험가`;
 
-            await saveProgress("학습 시작함", 0);
-            loadQuestion();
+            await saveLMS("지도 구경 시작함", 0);
         }
 
-        // 2. 실시간 상태 전송 함수
-        async function saveProgress(status, currentScore) {
+        // 2. 파이어베이스 데이터 실시간 업로드
+        async function saveLMS(currentLocation, count) {
             if (!studentKey) return;
             try {
-                await setDoc(doc(db, "seobusan_lms", studentKey), {
+                await setDoc(doc(db, "seobusan_map_lms", studentKey), {
                     num: parseInt(studentNum),
                     name: studentName,
-                    status: status,
-                    score: currentScore,
+                    currentLocation: currentLocation,
+                    learnedCount: count,
                     timestamp: new Date().toLocaleTimeString('ko-KR')
                 }, { merge: true });
             } catch (e) {
-                console.error("데이터 저장 실패: ", e);
+                console.error("데이터 저장 에러: ", e);
             }
         }
 
-        // 3. 문제 출력
-        function loadQuestion() {
-            const feedbackEl = document.getElementById('feedback');
-            feedbackEl.innerText = '';
-            
-            const currentQuiz = quizData[currentQuestionIndex];
-            document.getElementById('progress').innerText = `문제 ${currentQuestionIndex + 1} / ${quizData.length}`;
-            document.getElementById('quiz-icon').innerText = currentQuiz.icon;
-            document.getElementById('question').innerText = currentQuiz.question;
-            
-            const optionsContainer = document.getElementById('options');
-            optionsContainer.innerHTML = '';
-            
-            currentQuiz.options.forEach((option, index) => {
-                const button = document.createElement('button');
-                button.innerText = `${index + 1}. ${option}`;
-                button.className = "w-full text-left p-4 border-2 border-slate-200 rounded-xl hover:bg-blue-50 hover:border-blue-400 transition font-medium text-gray-700";
-                button.onclick = () => checkAnswer(index);
-                optionsContainer.appendChild(button);
-            });
+        // 3. 지도에서 구역 클릭 시 작동
+        async function selectZone(zoneKey) {
+            currentSelectedZone = zoneKey;
+            const data = zoneData[zoneKey];
+
+            document.getElementById('intro-box').classList.add('hidden');
+            const detailBox = document.getElementById('detail-box');
+            detailBox.classList.remove('hidden');
+
+            // 내용 교체
+            document.getElementById('place-name').innerText = data.name;
+            document.getElementById('place-tag').className = `text-xs font-bold uppercase px-2.5 py-1 rounded-full text-white ${data.tagColor}`;
+            document.getElementById('place-tag').innerText = zoneKey.toUpperCase() + " GU";
+            document.getElementById('place-img').src = data.img;
+            document.getElementById('place-desc').innerText = data.desc;
+
+            // 교사 대시보드 전송 (현재 어떤 구를 읽는지)
+            await saveLMS(`${data.name} 읽는 중`, learnedZones.size);
         }
 
-        // 4. 정답 확인 및 실시간 전송 트리거
-        async function checkAnswer(selectedIndex) {
-            const currentQuiz = quizData[currentQuestionIndex];
-            const buttons = document.getElementById('options').getElementsByTagName('button');
+        // 4. 이 고장 학습 완료 단추 누름 처리
+        async function markAsLearned() {
+            if(!currentSelectedZone) return;
             
-            for(let btn of buttons) btn.disabled = true;
+            learnedZones.add(currentSelectedZone);
+            const count = learnedZones.size;
 
-            const feedbackEl = document.getElementById('feedback');
-            if (selectedIndex === currentQuiz.answer) {
-                feedbackEl.innerText = "⭕ 정답입니다!";
-                feedbackEl.className = "mt-4 text-center font-bold text-lg h-6 text-green-600";
-                score += 20;
-            } else {
-                feedbackEl.innerText = `❌ 오답! 정답은 [${currentQuiz.options[currentQuiz.answer]}]`;
-                feedbackEl.className = "mt-4 text-center font-bold text-lg h-6 text-red-500";
-            }
+            // 게이지 바 계산 업데이트
+            document.getElementById('progress-text').innerText = `${count} / 5 구역 완료`;
+            document.getElementById('progress-bar').style.width = `${(count / 5) * 100}%`;
 
-            currentQuestionIndex++;
-            const currentStatus = currentQuestionIndex < quizData.length ? `${currentQuestionIndex + 1}번 문제 푸는 중` : "학습 완료";
-            await saveProgress(currentStatus, score);
-
-            setTimeout(() => {
-                if (currentQuestionIndex < quizData.length) {
-                    loadQuestion();
-                } else {
-                    showResult();
-                }
-            }, 2000);
+            alert(`🎉 ${zoneData[currentSelectedZone].name} 탐험 도장을 쾅 찍었습니다!`);
+            
+            // 데이터베이스 업데이트
+            await saveLMS(`${zoneData[currentSelectedZone].name} 공부 완료`, count);
         }
 
-        // 5. 학습 종료 화면
-        function showResult() {
-            document.getElementById('quiz-screen').classList.add('hidden');
-            document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('score').innerText = `${score}점`;
-            
-            const commentEl = document.getElementById('comment');
-            if(score === 100) commentEl.innerText = "🏅 완벽해요! 서부산 박사로 임명합니다!";
-            else if(score >= 60) commentEl.innerText = "👍 고장에 대해 아주 훌륭하게 학습했군요!";
-            else commentEl.innerText = "📖 교재를 조금 더 살펴보고 다시 도전해 봐요!";
-        }
-
-        // 6. 교사용 실시간 스트리밍 모니터링
+        // 5. 교사용 대시보드 열고 닫기 (실시간 동기화 리스너)
         let unsubscribe = null;
         function toggleTeacherView() {
             const dashboard = document.getElementById('teacher-dashboard');
             if (dashboard.classList.contains('hidden')) {
                 dashboard.classList.remove('hidden');
-                
-                // 번호 순서(오름차순)대로 실시간 정렬하여 가져오기
-                const q = query(collection(db, "seobusan_lms"), orderBy("num", "asc"));
-                
+
+                const q = query(collection(db, "seobusan_map_lms"), orderBy("num", "asc"));
                 unsubscribe = onSnapshot(q, (querySnapshot) => {
                     const tbody = document.getElementById('student-list');
                     tbody.innerHTML = '';
-                    
+
                     if(querySnapshot.empty) {
-                        tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">접속한 학생이 아직 없습니다.</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">학습 중인 학생이 없습니다.</td></tr>`;
                         return;
                     }
 
@@ -238,17 +283,14 @@
                         const row = document.createElement('tr');
                         row.className = "border-b hover:bg-slate-50 transition";
                         
-                        let statusBadge = `<span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">${data.status}</span>`;
-                        if(data.status === "학습 완료") {
-                            statusBadge = `<span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">🎉 학습 완료</span>`;
-                        }
+                        let badgeColor = data.learnedCount === 5 ? "bg-emerald-100 text-emerald-800" : "bg-blue-100 text-blue-800";
 
                         row.innerHTML = `
-                            <td class="p-3 font-medium text-gray-900">${data.num}번</td>
-                            <td class="p-3">${data.name}</td>
-                            <td class="p-3">${statusBadge}</td>
-                            <td class="p-3 font-bold text-orange-500">${data.score}점</td>
-                            <td class="p-3 text-xs text-gray-400">${data.timestamp}</td>
+                            <td class="p-3 font-bold text-slate-900">${data.num}번</td>
+                            <td class="p-3 font-medium">${data.name}</td>
+                            <td class="p-3 text-slate-500">${data.currentLocation}</td>
+                            <td class="p-3"><span class="${badgeColor} text-xs font-bold px-2.5 py-1 rounded-full">${data.learnedCount} / 5 구역 완료</span></td>
+                            <td class="p-3 text-xs text-slate-400">${data.timestamp}</td>
                         `;
                         tbody.appendChild(row);
                     });
