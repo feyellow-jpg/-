@@ -3,337 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>우리 고장 부산 지도 탐험대</title>
+    <title>서부산·원도심 고장 탐사대</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f8fafc; }
-        .hidden { display: none; }
-        /* 지도 구역별 스타일 */
-        .zone-saha { background-color: #fef08a; border-color: #eab308; }
-        .zone-seo { background-color: #bfdbfe; border-color: #3b82f6; }
-        .zone-yeongdo { background-color: #bbf7d0; border-color: #22c55e; }
-        .zone-jung { background-color: #fed7aa; border-color: #f97316; }
-        .zone-dong { background-color: #fbcfe8; border-color: #ec4899; }
+        :root { --primary: #0f172a; --accent: #0d9488; --bg: #f8fafc; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #e2e8f0; margin: 0; padding: 0; overflow: hidden; }
         
-        @keyframes pop {
-            0% { transform: scale(0.5); opacity: 0; }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); opacity: 1; }
+        .slide-container {
+            width: 1280px; height: 720px; background: white; margin: 20px auto;
+            position: relative; overflow: hidden; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            display: none; flex-direction: column; padding: 60px; border-radius: 12px;
         }
-        .pop-effect { animation: pop 0.5s ease-out forwards; }
+        .active { display: flex; }
+        
+        /* 컨설팅 스타일 데코레이션 */
+        .slide-header { border-bottom: 2px solid var(--primary); padding-bottom: 20px; margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .slide-title { font-family: 'Nanum Myeongjo', serif; font-size: 42px; color: var(--primary); margin: 0; }
+        .slide-subtitle { color: var(--accent); font-weight: bold; }
+
+        /* 지도 레이아웃 */
+        .map-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; flex-grow: 1; align-items: center; }
+        .map-card { 
+            background: var(--bg); border: 2px solid #e2e8f0; border-radius: 16px; padding: 30px; 
+            text-align: center; cursor: pointer; transition: all 0.3s; height: 100%; display: flex; flex-direction: column; justify-content: center;
+        }
+        .map-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .map-card h3 { font-size: 28px; margin-bottom: 10px; }
+        .map-card p { font-size: 14px; color: #64748b; }
+
+        /* 학습/퀴즈 UI */
+        .content-split { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; flex-grow: 1; }
+        .image-box { border-radius: 12px; overflow: hidden; height: 350px; background: #eee; border: 1px solid #ddd; position: relative; }
+        .image-box img { width: 100%; height: 100%; object-fit: cover; }
+        .info-text { font-size: 18px; line-height: 1.6; color: #334155; white-space: pre-line; }
+        
+        .btn-action { background: var(--primary); color: white; padding: 15px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-action:hover { opacity: 0.9; transform: scale(1.02); }
+
+        /* 업로드 UI */
+        .upload-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; background: #f1f5f9; cursor: pointer; }
+        .upload-zone:hover { border-color: var(--accent); background: #f0fdfa; }
+
+        /* 애니메이션 */
+        @keyframes successPop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .success-overlay { position: absolute; inset: 0; background: rgba(13, 148, 136, 0.9); display: none; justify-content: center; align-items: center; z-index: 50; animation: successPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); color: white; border-radius: 12px; }
     </style>
 </head>
-<body class="p-4 max-w-5xl mx-auto">
+<body>
 
-    <div id="login-screen" class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md mx-auto mt-20">
-        <h1 class="text-3xl font-extrabold text-blue-600 mb-2">🗺️ 부산 고장 탐험대</h1>
-        <p class="text-gray-500 mb-8 text-sm font-medium">선생님이 주신 실사 사진을 보며 고장을 재미있게 탐험해요!</p>
+<div class="slide-container active" id="slide-login">
+    <div style="margin: auto; text-align: center; max-width: 600px;">
+        <h1 style="font-size: 64px; margin-bottom: 10px; font-family: 'Nanum Myeongjo';">부산 고장 탐사대</h1>
+        <p style="font-size: 20px; color: #64748b; margin-bottom: 50px;">3학년 사회 - 우리 고장의 모습 실감 학습</p>
         <div class="space-y-4">
-            <input type="number" id="student-num" placeholder="학급 번호 (예: 5)" class="w-full p-4 border-2 border-slate-200 rounded-xl focus:outline-blue-500 text-lg">
-            <input type="text" id="student-name" placeholder="이름 (예: 홍길동)" class="w-full p-4 border-2 border-slate-200 rounded-xl focus:outline-blue-500 text-lg">
-            <button onclick="startExploration()" class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold text-lg hover:bg-blue-700 shadow-md transition">탐험 시작하기</button>
+            <input type="number" id="st-num" placeholder="학급 번호" class="w-full p-4 border rounded-lg text-lg">
+            <input type="text" id="st-name" placeholder="이름" class="w-full p-4 border rounded-lg text-lg">
+            <button onclick="app.start()" class="w-full btn-action" style="font-size: 20px;">탐사 시작하기</button>
         </div>
-        <div class="mt-8 pt-4 border-t border-gray-100 text-right">
-            <button onclick="toggleTeacherView()" class="text-xs text-slate-400 hover:underline">교사 대시보드 열기</button>
-        </div>
+        <p style="margin-top: 30px; font-size: 12px; color: #94a3b8;">※ 구글 드라이브와 Firebase 실시간 연동 시스템</p>
     </div>
+</div>
 
-    <div id="main-app" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4">
-        
-        <div id="map-area" class="lg:col-span-7 bg-white p-6 rounded-2xl shadow-md border border-slate-100">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-slate-800">📍 공부하고 싶은 구를 선택하세요!</h2>
-                <span id="student-display" class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full"></span>
+<div class="slide-container" id="slide-map">
+    <div class="slide-header">
+        <h2 class="slide-title">고장 탐사 지도</h2>
+        <div class="slide-subtitle" id="user-info"></div>
+    </div>
+    <div class="map-grid">
+        <div class="map-card" style="grid-column: 2" onclick="app.goDetail('dong')"><h3>동구</h3><p>초량 이바구길 / 168계단</p><span id="chk-dong">🤍</span></div>
+        <div class="map-card" onclick="app.goDetail('saha')"><h3>사하구</h3><p>다대포 / 감천문화마을</p><span id="chk-saha">🤍</span></div>
+        <div class="map-card" onclick="app.goDetail('seo')"><h3>서구</h3><p>송도 해수욕장 / 구름다리</p><span id="chk-seo">🤍</span></div>
+        <div class="map-card" onclick="app.goDetail('jung')"><h3>중구</h3><p>자갈치시장 / 용두산공원</p><span id="chk-jung">🤍</span></div>
+        <div class="map-card" style="grid-column: 2" onclick="app.goDetail('yeongdo')"><h3>영도구</h3><p>태종대 / 흰여울문화마을</p><span id="chk-yeongdo">🤍</span></div>
+    </div>
+</div>
+
+<div class="slide-container" id="slide-detail">
+    <div class="slide-header">
+        <h2 class="slide-title" id="det-title">고장 이름</h2>
+        <button onclick="app.goMap()" class="text-slate-500 font-bold hover:underline">🏠 지도로 돌아가기</button>
+    </div>
+    <div class="content-split">
+        <div class="space-y-6">
+            <div class="image-box">
+                <img id="det-img" src="" alt="실사">
+                <div id="upload-success" class="success-overlay flex-col">
+                    <span class="text-4xl">📸</span>
+                    <span class="font-bold mt-2">나의 사진 업로드 성공!</span>
+                </div>
             </div>
-            
-            <div class="grid grid-cols-3 gap-4 bg-slate-50 p-6 rounded-xl border border-slate-200 h-[400px] content-center">
-                <div></div>
-                <button onclick="selectZone('dong')" class="zone-dong border-2 p-6 rounded-2xl font-bold text-lg shadow hover:scale-105 transition flex flex-col items-center justify-center gap-1">
-                    <span>동구</span><span id="badge-dong" class="text-xs text-slate-400">🤍 미완료</span>
-                </button>
-                <div></div>
-
-                <button onclick="selectZone('saha')" class="zone-saha border-2 p-6 rounded-2xl font-bold text-lg shadow hover:scale-105 transition flex flex-col items-center justify-center gap-1 row-span-2">
-                    <span>사하구</span><span id="badge-saha" class="text-xs text-slate-400">🤍 미완료</span>
-                </button>
-                <button onclick="selectZone('seo')" class="zone-seo border-2 p-6 rounded-2xl font-bold text-lg shadow hover:scale-105 transition flex flex-col items-center justify-center gap-1">
-                    <span>서구</span><span id="badge-seo" class="text-xs text-slate-400">🤍 미완료</span>
-                </button>
-                <button onclick="selectZone('jung')" class="zone-jung border-2 p-6 rounded-2xl font-bold text-lg shadow hover:scale-105 transition flex flex-col items-center justify-center gap-1">
-                    <span>중구</span><span id="badge-jung" class="text-xs text-slate-400">🤍 미완료</span>
-                </button>
-
-                <div></div>
-                <button onclick="selectZone('yeongdo')" class="zone-yeongdo border-2 p-6 rounded-2xl font-bold text-lg shadow hover:scale-105 transition flex flex-col items-center justify-center gap-1">
-                    <span>영도구</span><span id="badge-yeongdo" class="text-xs text-slate-400">🤍 미완료</span>
-                </button>
+            <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-in').click()">
+                <p class="font-bold text-slate-700">📸 사진 올리기 또는 스크린샷 붙여넣기</p>
+                <p class="text-xs text-slate-500 mt-1">이곳을 클릭해 파일을 선택하거나 Ctrl+V를 누르세요</p>
+                <input type="file" id="file-in" class="hidden" accept="image/*" onchange="app.handleFile(this.files[0])">
             </div>
         </div>
-
-        <div class="lg:col-span-5 bg-white p-6 rounded-2xl shadow-md border border-slate-100 flex flex-col justify-between min-h-[480px]">
-            
-            <div id="intro-box" class="text-center py-24 text-slate-400 font-medium">
-                <span class="text-5xl block mb-4">👀</span>
-                왼쪽 지도에서 구를 터치하면 생생한 실사 자료가 펼쳐집니다!
-            </div>
-
-            <div id="detail-box" class="hidden">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 id="place-name" class="text-2xl font-extrabold text-slate-800">장소명</h3>
-                    <button onclick="goHome()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 text-xs font-bold rounded-lg flex items-center gap-1">🏠 지도 홈</button>
-                </div>
-                
-                <div class="w-full h-44 bg-slate-100 rounded-xl overflow-hidden mb-3 border border-slate-200">
-                    <img id="place-img" src="" alt="고장 사진" class="w-full h-full object-cover">
-                </div>
-
-                <p id="place-desc" class="text-slate-600 text-sm leading-relaxed bg-slate-50 p-3 rounded-xl mb-3 whitespace-pre-line border border-slate-100"></p>
-
-                <a id="place-link" href="#" target="_blank" class="block text-center text-xs font-bold text-blue-600 bg-blue-50 p-2 rounded-lg hover:underline mb-4">🌐 공식 홈페이지가 궁금해요 (클릭)</a>
-
-                <button onclick="openQuiz()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow transition">✏️ 퀴즈 풀고 도장 받기</button>
-            </div>
-
-            <div id="quiz-box" class="hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-sm font-bold text-orange-500">❓ 딩동댕 확인문제</span>
-                    <button onclick="goHome()" class="bg-slate-100 text-slate-600 px-2 py-1 text-xs rounded">포기하고 홈으로</button>
-                </div>
-                <p id="quiz-question" class="font-bold text-slate-800 mb-4 text-base"></p>
-                <div id="quiz-options" class="space-y-2 mb-4"></div>
-                
-                <div id="quiz-feedback" class="hidden text-center p-4 bg-emerald-50 text-emerald-700 font-extrabold rounded-xl border border-emerald-200 pop-effect">
-                    <span class="text-2xl block">🎉 정답입니다! 💥</span>
-                    지도에 탐험 도장이 찍혔습니다!
-                </div>
-            </div>
-            
-            <div class="mt-4 pt-4 border-t border-slate-100">
-                <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
-                    <span>나의 탐험 도장 개수</span>
-                    <span id="progress-text">0 / 5 구역 완료</span>
-                </div>
-                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                    <div id="progress-bar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
-                </div>
+        <div class="flex flex-col justify-between">
+            <p id="det-desc" class="info-text"></p>
+            <div class="bg-slate-50 p-6 rounded-xl border">
+                <p class="font-bold mb-4 text-slate-800">✏️ 확인 퀴즈</p>
+                <p id="det-quiz" class="text-lg mb-4"></p>
+                <div id="det-opts" class="grid grid-cols-2 gap-2"></div>
             </div>
         </div>
     </div>
+</div>
 
-    <div id="teacher-dashboard" class="bg-white p-6 rounded-2xl shadow-xl mt-8 border border-slate-200 hidden">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b">📊 [교사용] 학생 실시간 진도표</h2>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-sm">
-                <thead>
-                    <tr class="bg-slate-50 text-slate-600 font-semibold">
-                        <th class="p-2 border-b">번호</th><th class="p-2 border-b">이름</th>
-                        <th class="p-2 border-b">현재 행동</th><th class="p-2 border-b">도장 개수</th>
-                        <th class="p-2 border-b">시간</th>
-                    </tr>
-                </thead>
-                <tbody id="student-list" class="text-slate-600">
-                    <tr><td colspan="5" class="p-4 text-center text-slate-400">학생 접속을 기다리는 중...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    // 1. Firebase 설정
+    const firebaseConfig = {
+        apiKey: "AIzaSyCS8kWxKMV9qk06wxeEaYnNa9FK652CDsU",
+        authDomain: "sahagu-69868.firebaseapp.com",
+        projectId: "sahagu-69868",
+        storageBucket: "sahagu-69868.firebasestorage.app",
+        messagingSenderId: "635938643907",
+        appId: "1:635938643907:web:c6fc1a012c7acea1a76776",
+        measurementId: "G-35GC10BWF1"
+    };
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCS8kWxKMV9qk06wxeEaYnNa9FK652CDsU",
-            authDomain: "sahagu-69868.firebaseapp.com",
-            projectId: "sahagu-69868",
-            storageBucket: "sahagu-69868.firebasestorage.app",
-            messagingSenderId: "635938643907",
-            appId: "1:635938643907:web:c6fc1a012c7acea1a76776",
-            measurementId: "G-35GC10BWF1"
-        };
+    // 2. 구글 앱스 스크립트(GAS) 웹 앱 URL 🌟(선생님이 주신 주소 연동 완료!)
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzAVpdjYIrIYFOTHyqDAhAdoFgufoaRm3HmMqvvZumbrDTSnfgqaJSvIb9GEVNptwgi/exec"; 
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const app_fb = initializeApp(firebaseConfig);
+    const db = getFirestore(app_fb);
 
-        // 🔥 선생님이 보내주신 5장의 실사 파일명 매칭 완료! 
-        // index.html과 같은 깃허브 저장소 폴더에 이 이미지들을 같이 업로드해 주세요!
-        const zoneData = {
-            saha: {
-                name: "사하구 (다대포 & 감천마을)",
-                img: "DA.jpg", // 다대포 해수욕장 실사 매칭
-                link: "https://www.saha.go.kr", 
-                desc: "🌊 다대포 해수욕장: 백사장이 아주 넓고 부드러운 갯벌이 발달하여 신나는 조개잡이 체험을 할 수 있어요.\n🏡 감천문화마을: 앞집이 뒷집을 가리지 않는 계단식 마을로, 알록달록 다채로운 색감의 예술 골목으로 유명해요.",
-                q: "다대포 해수욕장에 발달해 있어 초등학생들이 조개잡이 체험을 하기 좋은 곳은 어디일까요?",
-                options: ["자갈밭", "절벽 동굴", "넓은 갯벌", "깊은 바다"],
-                ans: 2
-            },
-            seo: {
-                name: "서구 (송도 구름산책로)",
-                img: "SONG.jpg", // 송도 구름산책로 실사 매칭
-                link: "https://www.bsseogu.go.kr",
-                desc: "🏖️ 송도해수욕장: 우리나라 제 1호 해수욕장 타이틀을 가지고 있어요.\n🚡 구름산책로: 바다 위에 다리를 길게 놓아 마치 구름 위를 걷듯 파도를 생생하게 내려다볼 수 있어요.",
-                q: "우리나라에서 가장 먼저 만들어진 '제 1호 공설 해수욕장'의 이름은 무엇일까요?",
-                options: ["해운대해수욕장", "송도해수욕장", "광안리해수욕장", "다대포해수욕장"],
-                ans: 1
-            },
-            yeongdo: {
-                name: "영도구 (태종대 바위절벽)",
-                img: "TAE.jpg", // 태종대 흰 등대와 바다 실사 매칭
-                link: "https://www.yeongdo.go.kr",
-                desc: "⛰️ 태종대: 울창한 숲과 함께 푸른 바다를 가르는 멋진 바위 절벽이 장관을 이루는 고장의 자랑이에요.\n🌊 흰여울문화마을: 바다 바로 옆 벼랑 끝에 옹기종기 붙은 흰 마을길이 참 아름답습니다.",
-                q: "영도 가장 남쪽에 위치하며 날씨가 맑으면 대마도까지 보이는 절벽 절경 명소는 어디일까요?",
-                options: ["금정산성", "용두산공원", "태종대", "초량이바구길"],
-                ans: 2
-            },
-            jung: {
-                name: "중구 (활기찬 자갈치시장)",
-                img: "JA.jpg", // 자갈치 어시장 실사 매칭
-                link: "https://www.bsjunggu.go.kr",
-                desc: "🐟 자갈치시장: 부산을 대표하는 전국에서 가장 크고 활기찬 수산물 전문 시장이랍니다.\n🗼 용두산공원: 도심 중심에 우뚝 솟은 부산타워에서 고장의 전체 풍경을 시원하게 둘러볼 수 있어요.",
-                q: "부산을 대표하는 수산물 시장으로 \"오이소, 보이소, 사이소!\"의 외침이 가득한 이곳은?",
-                options: ["자갈치시장", "국제시장", "부평깡통시장", "초량시장"],
-                ans: 0
-            },
-            dong: {
-                name: "동구 (산복도로 초량 이바구길)",
-                img: "GAM.jpg", // 산복도로 가옥 전경 매칭
-                link: "https://www.bsdonggu.go.kr",
-                desc: "🏃‍♂️ 초량 이바구길: 부산항이 훤히 내려다보이는 산복도로 동네의 산증인 같은 역사 계단길이에요.\n🚠 168계단: 가파르고 높은 옛날 동네 계단 옆으로 주민들을 위한 모노레일이 설치되어 있답니다.",
-                q: "과거 산복도로 마을의 애환이 서려 있으며, 지금은 모노레일이 설치된 동구의 가파른 계단 수는?",
-                options: ["100계단", "120계단", "150계단", "168계단"],
-                ans: 3
-            }
-        };
+    const zoneData = {
+        saha: { name: "사하구", img: "DA.jpg", desc: "다대포 해수욕장은 넓은 갯벌이 있어 조개잡이 체험이 가능하며, 세계적인 낙조 분수로 유명합니다. 감천문화마을은 계단식 마을로 '부산의 마추픽추'라 불립니다.", quiz: "다대포에서 할 수 있는 체험은?", opts: ["스키 타기", "조개 잡기", "눈썰매 타기", "사막 탐험"], ans: 1 },
+        seo: { name: "서구", img: "SONG.jpg", desc: "송도 해수욕장은 우리나라 1호 해수욕장입니다. 바다 위를 걷는 듯한 구름산책로와 짜릿한 해상케이블카를 즐길 수 있습니다.", quiz: "우리나라 1호 해수욕장의 이름은?", opts: ["해운대", "광안리", "송도", "다대포"], ans: 2 },
+        yeongdo: { name: "영도구", img: "TAE.jpg", desc: "태종대는 깎아지른 절벽과 푸른 바다가 어우러진 명승지입니다. 흰여울문화마을은 절벽 끝 바다길을 따라 걷는 아름다운 마을입니다.", quiz: "영도의 남쪽 끝, 절벽이 아름다운 곳은?", opts: ["태종대", "용두산", "어린이대공원", "시민공원"], ans: 0 },
+        jung: { name: "중구", img: "JA.jpg", desc: "자갈치시장은 부산에서 가장 큰 수산물 시장입니다. '오이소 보이소 사이소'라는 구호로 유명하며 싱싱한 생선이 가득합니다.", quiz: "부산의 대표적인 수산물 시장은?", opts: ["국제시장", "자갈치시장", "평화시장", "꽃시장"], ans: 1 },
+        dong: { name: "동구", img: "GAM.jpg", desc: "초량 이바구길은 산복도로의 역사를 담은 길입니다. 168계단과 모노레일은 가파른 동네를 연결해주는 신기한 교통수단입니다.", quiz: "동구의 가파른 계단 수는 몇 개인가요?", opts: ["100개", "150개", "168개", "200개"], ans: 2 }
+    };
 
-        let studentKey = ""; let studentName = ""; let studentNum = "";
-        let currentZone = ""; let learnedZones = new Set();
+    window.app = {
+        stKey: "", num: "", name: "", currentZone: "",
+        learned: new Set(),
 
-        window.startExploration = startExploration;
-        window.selectZone = selectZone;
-        window.openQuiz = openQuiz;
-        window.goHome = goHome;
-        window.toggleTeacherView = toggleTeacherView;
+        start: async function() {
+            this.num = document.getElementById('st-num').value;
+            this.name = document.getElementById('st-name').value;
+            if(!this.num || !this.name) return alert("정보를 입력하세요.");
+            this.stKey = `${this.num.padStart(2,'0')}_${this.name}`;
+            document.getElementById('user-info').innerText = `${this.num}번 ${this.name} 탐험가`;
+            this.showSlide('slide-map');
+            this.updateLMS("탐험 시작");
+        },
 
-        async function startExploration() {
-            studentNum = document.getElementById('student-num').value.trim();
-            studentName = document.getElementById('student-name').value.trim();
-            if (!studentNum || !studentName) return alert("번호와 이름을 채워주세요!");
+        showSlide: (id) => {
+            document.querySelectorAll('.slide-container').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        },
 
-            studentKey = `${studentNum.padStart(2, '0')}_${studentName}`;
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('student-display').innerText = `🧭 ${studentNum}번 ${studentName}`;
-            await saveLMS("지도 대기 중", 0);
-        }
+        goMap: function() { this.showSlide('slide-map'); this.updateLMS("지도 대기"); },
 
-        async function saveLMS(loc, count) {
-            if (!studentKey) return;
-            await setDoc(doc(db, "seobusan_map_lms", studentKey), {
-                num: parseInt(studentNum), name: studentName, currentLocation: loc, learnedCount: count, timestamp: new Date().toLocaleTimeString('ko-KR')
-            }, { merge: true });
-        }
-
-        function goHome() {
-            document.getElementById('detail-box').classList.add('hidden');
-            document.getElementById('quiz-box').classList.add('hidden');
-            document.getElementById('intro-box').classList.remove('hidden');
-            saveLMS("지도 대기 중", learnedZones.size);
-        }
-
-        function selectZone(zoneKey) {
-            currentZone = zoneKey;
-            const data = zoneData[zoneKey];
+        goDetail: function(key) {
+            this.currentZone = key;
+            const data = zoneData[key];
+            document.getElementById('det-title').innerText = data.name;
+            document.getElementById('det-img').src = data.img;
+            document.getElementById('det-desc').innerText = data.desc;
+            document.getElementById('det-quiz').innerText = data.quiz;
+            document.getElementById('upload-success').style.display = 'none';
             
-            document.getElementById('intro-box').classList.add('hidden');
-            document.getElementById('quiz-box').classList.add('hidden');
-            document.getElementById('detail-box').classList.remove('hidden');
-
-            document.getElementById('place-name').innerText = data.name;
-            document.getElementById('place-img').src = data.img;
-            document.getElementById('place-desc').innerText = data.desc;
-            document.getElementById('place-link').href = data.link;
-
-            saveLMS(`${data.name} 공부 중`, learnedZones.size);
-        }
-
-        function openQuiz() {
-            const data = zoneData[currentZone];
-            document.getElementById('detail-box').classList.add('hidden');
-            const qBox = document.getElementById('quiz-box');
-            qBox.classList.remove('hidden');
-
-            document.getElementById('quiz-question').innerText = `💡 ${data.q}`;
-            document.getElementById('quiz-feedback').classList.add('hidden');
-
-            const optionsDiv = document.getElementById('quiz-options');
-            optionsDiv.innerHTML = '';
-            
-            data.options.forEach((opt, idx) => {
+            const optsDiv = document.getElementById('det-opts');
+            optsDiv.innerHTML = '';
+            data.opts.forEach((opt, idx) => {
                 const btn = document.createElement('button');
-                btn.innerText = `${idx+1}. ${opt}`;
-                btn.className = "w-full text-left p-3 border border-slate-200 rounded-xl hover:bg-orange-50 font-medium text-slate-700 text-sm";
-                btn.onclick = () => checkAnswer(idx);
-                optionsDiv.appendChild(btn);
+                btn.innerText = opt;
+                btn.className = "p-3 border rounded-lg hover:bg-slate-100 text-sm";
+                btn.onclick = () => this.checkAns(idx);
+                optsDiv.appendChild(btn);
             });
-            saveLMS(`${data.name} 퀴즈 푸는 중`, learnedZones.size);
-        }
+            this.showSlide('slide-detail');
+            this.updateLMS(`${data.name} 학습 중`);
+        },
 
-        async function checkAnswer(idx) {
-            const data = zoneData[currentZone];
-            const buttons = document.getElementById('quiz-options').getElementsByTagName('button');
-            
-            if(idx === data.ans) {
-                for(let b of buttons) b.disabled = true;
-                try { new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-84.wav').play(); } catch(e){}
-
-                document.getElementById('quiz-feedback').classList.remove('hidden');
-                
-                learnedZones.add(currentZone);
-                document.getElementById(`badge-${currentZone}`).innerText = "✅ 탐험 완료";
-                document.getElementById(`badge-${currentZone}`).className = "text-xs font-bold text-emerald-600";
-
-                const count = learnedZones.size;
-                document.getElementById('progress-text').innerText = `${count} / 5 구역 완료`;
-                document.getElementById('progress-bar').style.width = `${(count / 5) * 100}%`;
-
-                await saveLMS(`${data.name} 도장 획득!`, count);
-                setTimeout(() => { goHome(); }, 2500);
+        checkAns: function(idx) {
+            if(idx === zoneData[this.currentZone].ans) {
+                alert("딩동댕! 정답입니다.");
+                this.learned.add(this.currentZone);
+                document.getElementById(`chk-${this.currentZone}`).innerText = "✅";
+                this.updateLMS(`${zoneData[this.currentZone].name} 마스터!`);
             } else {
-                alert("❌ 다시 한 번 설명판을 읽어보고 풀어볼까요?");
+                alert("다시 한 번 읽어볼까요?");
             }
-        }
+        },
 
-        let unsubscribe = null;
-        function toggleTeacherView() {
-            const dashboard = document.getElementById('teacher-dashboard');
-            if (dashboard.classList.contains('hidden')) {
-                dashboard.classList.remove('hidden');
-                const q = query(collection(db, "seobusan_map_lms"), orderBy("num", "asc"));
-                unsubscribe = onSnapshot(q, (snapshot) => {
-                    const tbody = document.getElementById('student-list');
-                    tbody.innerHTML = '';
-                    if(snapshot.empty) {
-                        tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">학습 중인 학생 없음</td></tr>`;
-                        return;
-                    }
-                    snapshot.forEach((doc) => {
-                        const d = doc.data();
-                        const row = document.createElement('tr');
-                        row.className = "border-b text-xs";
-                        row.innerHTML = `
-                            <td class="p-2 font-bold">${d.num}번</td><td>${d.name}</td>
-                            <td class="p-2 text-slate-500">${d.currentLocation}</td>
-                            <td class="p-2 font-bold text-emerald-600">${d.learnedCount} 개</td>
-                            <td class="p-2 text-slate-400">${d.timestamp}</td>
-                        `;
-                        tbody.appendChild(row);
+        updateLMS: async function(status) {
+            await setDoc(doc(db, "seobusan_lms_v2", this.stKey), {
+                num: parseInt(this.num), name: this.name, status: status, count: this.learned.size, time: new Date().toLocaleTimeString()
+            }, { merge: true });
+        },
+
+        // 📸 사진 및 스크린샷 처리 로직
+        handleFile: async function(file) {
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64Data = e.target.result.split(',')[1];
+                const payload = {
+                    fileName: `${this.stKey}_${this.currentZone}.png`,
+                    mimeType: file.type,
+                    base64: base64Data
+                };
+
+                // 구글 드라이브로 파일 전송
+                try {
+                    const response = await fetch(GAS_URL, {
+                        method: "POST",
+                        body: JSON.stringify(payload)
                     });
-                });
-            } else {
-                dashboard.classList.add('hidden');
-                if (unsubscribe) unsubscribe();
-            }
+                    const result = await response.json();
+                    if(result.result === "success") {
+                        document.getElementById('upload-success').style.display = 'flex';
+                        this.updateLMS(`${zoneData[this.currentZone].name} 사진 업로드함`);
+                    }
+                } catch (err) {
+                    alert("업로드 중 오류가 발생했습니다. 구글 권한 설정을 확인하세요.");
+                }
+            };
+            reader.readAsDataURL(file);
         }
-    </script>
+    };
+
+    // 붙여넣기(Ctrl+V) 감지하여 스크린샷 즉시 업로드
+    window.addEventListener('paste', (e) => {
+        const item = e.clipboardData.items[0];
+        if (item && item.type.indexOf('image') !== -1) {
+            const blob = item.getAsFile();
+            app.handleFile(blob);
+        }
+    });
+</script>
 </body>
 </html>
