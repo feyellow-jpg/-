@@ -189,7 +189,6 @@
         measurementId: "G-35GC10BWF1"
     };
 
-    // 구글 연동 엔드포인트 채널 결속
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzjXdn8bQyI2hLlvE5ikJST7VmOMQmJiroE5XLjpWLRXNyMyvoqCMgK2sE7sFgkJHBW/exec"; 
 
     const app_fb = initializeApp(firebaseConfig);
@@ -213,7 +212,6 @@
             this.name = document.getElementById('st-name').value.trim();
             if(!this.num || !this.name) return alert("번호와 이름을 입력하세요.");
             
-            // 🌟 정렬을 위해 번호가 1자리(예: 5)일 때 앞자리에 0을 붙여 '05_홍길동' 형태로 포맷팅합니다.
             this.stKey = `${this.num.padStart(2,'0')}_${this.name}`;
             document.getElementById('user-info').innerText = `🎖️ 탐험대원: ${this.num}번 ${this.name}`;
             
@@ -221,8 +219,9 @@
             this.showSlide('slide-map');
         },
 
-        showSlide: (id) => {
-            document.querySelectorAll('.slide-container').forEach(s => s.forEach(s => s.classList.remove('active')));
+        // ⭐ 오타 수정 완료 버그 치유 포인트
+        showSlide: function(id) {
+            document.querySelectorAll('.slide-container').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         },
 
@@ -278,7 +277,6 @@
             }, { merge: true });
         },
 
-        // 📸 스마트폰 카메라 사진 업로드 제어 핸들러
         handleFile: async function(file) {
             if(!file) return;
             const btn = document.querySelector('.btn-camera-trigger');
@@ -288,8 +286,6 @@
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const base64Data = e.target.result.split(',')[1];
-                
-                // 🌟 [요청사항 반영] 드라이브 저장 파일명을 번호_이름_고장명 형태로 완전히 일치시킵니다.
                 const formattedFileName = `${this.stKey}_${this.currentZone}.png`;
                 const payload = { fileName: formattedFileName, mimeType: file.type, base64: base64Data };
                 
