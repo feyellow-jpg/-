@@ -12,7 +12,6 @@
         :root { --primary: #0f172a; --accent: #0d9488; --bg: #f8fafc; }
         body { font-family: 'Pretendard', sans-serif; background-color: #cbd5e1; margin: 0; padding: 0; }
         
-        /* 메인 슬라이드 컨테이너 (컨설팅 레이아웃) */
         .slide-container {
             width: 1280px; height: 780px; background: white; margin: 20px auto;
             position: relative; overflow: hidden; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
@@ -24,7 +23,6 @@
         .slide-title { font-family: 'Nanum Myeongjo', serif; font-size: 40px; color: var(--primary); margin: 0; }
         .slide-subtitle { color: var(--accent); font-weight: bold; font-size: 18px; }
 
-        /* 🗺️ 지형 기반 지도 배치 (사하-서-중-동-영도) */
         .map-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 15px; flex-grow: 1; }
         .map-card { 
             background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 20px; padding: 10px; 
@@ -34,15 +32,14 @@
         .map-card h3 { font-size: 32px; font-weight: bold; color: var(--primary); }
         .map-card p { font-size: 14px; color: #475569; }
 
-        /* 학습 레이아웃 */
         .content-split { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; flex-grow: 1; }
         .image-box { border-radius: 12px; overflow: hidden; height: 320px; background: #f8fafc; border: 1px solid #e2e8f0; position: relative; }
         .image-box img { width: 100%; height: 100%; object-fit: cover; }
         
         .btn-capture { background: var(--accent); color: white; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; border: none; }
         .btn-capture:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .btn-capture:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
 
-        /* 대시보드 썸네일 스타일 */
         .thumb-img { width: 80px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; cursor: pointer; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -177,7 +174,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, setDoc, onSnapshot, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyCS8kWxKMV9qk06wxeEaYnNa9FK652CDsU",
         authDomain: "sahagu-69868.firebaseapp.com",
@@ -188,18 +184,18 @@
         measurementId: "G-35GC10BWF1"
     };
 
-    // 🌟 구글 앱스 스크립트(GAS) 주소 (배포 권한을 '모든 사용자'로 수정한 주소)
+    // 🌟 선생님의 구글 주소가 정확히 들어가 있는지 확인하세요!
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzAVpdjYIrIYFOTHyqDAhAdoFgufoaRm3HmMqvvZumbrDTSnfgqaJSvIb9GEVNptwgi/exec"; 
 
     const app_fb = initializeApp(firebaseConfig);
     const db = getFirestore(app_fb);
 
     const zoneData = {
-        saha: { name: "사하구", img: "DA.jpg", link: "https://www.saha.go.kr", desc: "🌊 다대포 해수욕장: 백사장이 넓어 부드러운 갯벌 체험을 할 수 있으며 노을이 아름답습니다.\n🏡 감천문화마을: 산자락을 따라 알록달록 늘어선 계단식 예술 골목이 멋진 고장입니다.", quiz: "다대포 해수욕장에서 초등학생들이 조개잡이를 체험하기 좋은 지형은 무엇일까요?", opts: ["자갈밭", "넓은 갯벌", "동굴 절벽", "깊은 바다"], ans: 1 },
-        seo: { name: "서구", img: "SONG.jpg", link: "https://www.bsseogu.go.kr", desc: "🏖️ 송도 해수욕장: 우리나라 제 1호 해수욕장이라는 역사를 가진 장소입니다.\n🚡 구름산책로: 바다 위에 투명하게 설치된 다리 위를 걸으며 출렁이는 파도를 관찰할 수 있습니다.", quiz: "우리나라에서 가장 먼저 만들어진 '제 1호 공설 해수욕장'의 이름은?", opts: ["해운대", "송도", "광안리", "다대포"], ans: 1 },
-        yeongdo: { name: "영도구", img: "TAE.jpg", link: "https://www.yeongdo.go.kr", desc: "⛰️ 태종대: 기암절벽과 울창한 숲이 어우러져 날씨가 맑으면 대마도까지 보이는 절경 명소입니다.\n🌊 흰여울문화마을: 가파른 벼랑 끝에 옹기종기 모여 있는 흰색 마을길이 아름다운 곳입니다.", quiz: "영도 남쪽 끝에 위치하며, 바다 절벽 경치가 아름다운 명승지는 어디일까요?", opts: ["금정산", "용두산", "태종대", "시민공원"], ans: 2 },
-        jung: { name: "중구", img: "JA.jpg", link: "https://www.bsjunggu.go.kr", desc: "🐟 자갈치시장: 부산의 대표적인 수산물 시장으로, 언제나 싱싱한 수산물이 가득하고 활기가 넘칩니다.\n🗼 용두산공원: 도심 속 산 위에 솟아오른 부산타워에서 고장의 전체 모습을 내려다볼 수 있습니다.", quiz: "부산의 대표적인 생선 및 수산물 시장으로 \"오이소, 보이소, 사이소!\"로 유명한 곳은?", opts: ["국제시장", "자갈치시장", "깡통시장", "초량시장"], ans: 1 },
-        dong: { name: "동구", img: "GAM.jpg", link: "https://www.bsdonggu.go.kr", desc: "🏃‍♂️ 초량 이바구길: 부산항이 내려다보이는 산복도로 동네의 깊은 역사와 삶의 흔적을 담은 길입니다.\n🚠 168계단: 가파르고 높은 옛 계단 옆으로 주민들을 위한 친절한 모노레일이 운행 중입니다.", quiz: "과거 산복도로 고장의 애환이 담겨있으며 모노레일이 설치된 동구의 유명한 계단 수는?", opts: ["100계단", "168계단", "200계단", "300계단"], ans: 1 }
+        saha: { name: "사하구", img: "DA.jpg", link: "https://www.saha.go.kr", desc: "🌊 다대포 해수욕장: 넓은 갯벌에서 조개잡이를 하고 노을을 봐요.\n🏡 감천문화마을: 계단식으로 만들어진 예쁜 마을 예술을 감상해요.", quiz: "다대포 해수욕장에서 할 수 있는 특별한 체험은?", opts: ["스키 타기", "갯벌 체험", "사막 탐험", "열차 타기"], ans: 1 },
+        seo: { name: "서구", img: "SONG.jpg", link: "https://www.bsseogu.go.kr", desc: "🏖️ 송도 해수욕장: 우리나라 1호 해수욕장이에요.\n🚡 구름산책로: 바다 위를 걷는 듯한 짜릿한 다리를 건너봐요.", quiz: "우리나라에서 가장 먼저 만들어진 공설 해수욕장의 이름은?", opts: ["해운대", "송도", "광안리", "다대포"], ans: 1 },
+        yeongdo: { name: "영도구", img: "TAE.jpg", link: "https://www.yeongdo.go.kr", desc: "⛰️ 태종대: 깎아지른 바위 절벽과 푸른 바다가 만나는 절경이에요.\n🌊 흰여울문화마을: 바다 옆 흰색 골목길이 정말 예꿔요.", quiz: "영도 가장 남쪽에 위치하며 절벽 경치가 뛰어난 명소는?", opts: ["금정산", "용두산", "태종대", "시민공원"], ans: 2 },
+        jung: { name: "중구", img: "JA.jpg", link: "https://www.bsjunggu.go.kr", desc: "🐟 자갈치시장: 부산의 활기가 넘치는 최대 수산물 시장이에요.\n🗼 용두산공원: 우뚝 솟은 부산타워에서 고장을 내려다봐요.", quiz: "부산의 대표적인 생선 시장으로 유명한 이곳의 이름은?", opts: ["국제시장", "자갈치시장", "부평시장", "평화시장"], ans: 1 },
+        dong: { name: "동구", img: "GAM.jpg", link: "https://www.bsdonggu.go.kr", desc: "🏃‍♂️ 초량 이바구길: 산복도로를 따라 걷는 역사 이야기길이에요.\n🚠 168계단: 가파른 계단 옆으로 귀여운 모노레일이 다녀요.", quiz: "동구의 가파른 계단으로 주민들을 위해 모노레일이 있는 곳은?", opts: ["100계단", "168계단", "200계단", "300계단"], ans: 1 }
     };
 
     window.app = {
@@ -276,37 +272,65 @@
 
         captureAndUpload: async function() {
             const btn = document.querySelector('.btn-capture');
-            btn.innerText = "📸 캡처하여 일지 전송 중...";
+            btn.innerText = "📸 캡처 진행 중...";
             btn.disabled = true;
 
             const activeSlide = document.querySelector('.slide-container.active');
-            html2canvas(activeSlide, { useCORS: true, logging: false }).then(canvas => {
+            html2canvas(activeSlide, { useCORS: true, logging: false, allowTaint: true }).then(canvas => {
                 canvas.toBlob(blob => {
                     if(blob) {
                         const file = new File([blob], `${this.stKey}_${this.currentZone}.png`, { type: "image/png" });
                         this.handleFile(file);
+                    } else {
+                        alert("캡처에 실패했습니다. 다시 한 번 눌러보세요.");
+                        btn.innerText = "📸 현재 이 화면 캡처하여 일지에 올리기";
+                        btn.disabled = false;
                     }
-                    btn.innerText = "📸 현재 이 화면 캡처하여 일지에 올리기";
-                    btn.disabled = false;
                 });
+            }).catch(err => {
+                alert("화면을 불러오는 중입니다. 잠시 후 다시 눌러주세요.");
+                btn.innerText = "📸 현재 이 화면 캡처하여 일지에 올리기";
+                btn.disabled = false;
             });
         },
 
+        // ⭐ [버그 대폭 수정] 구글 서버 무한대기 방지용 타임아웃 추가 로직
         handleFile: async function(file) {
+            const btn = document.querySelector('.btn-capture');
             const reader = new FileReader();
+            
             reader.onload = async (e) => {
                 const base64Data = e.target.result.split(',')[1];
                 const payload = { fileName: file.name, mimeType: file.type, base64: base64Data };
 
+                // 8초 뒤 구글이 대답 없으면 강제 취소시키는 타이머 가동
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000); 
+
                 try {
-                    const response = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
+                    btn.innerText = "🚀 구글 드라이브로 배달 중...";
+                    const response = await fetch(GAS_URL, { 
+                        method: "POST", 
+                        body: JSON.stringify(payload),
+                        signal: controller.signal 
+                    });
+                    
+                    clearTimeout(timeoutId); // 전송 성공했으므로 타이머 해제
                     const res = await response.json();
+                    
                     if(res.result === "success") {
                         document.getElementById('upload-success').style.display = 'flex';
                         this.imageMap[this.currentZone] = res.url; 
                         this.updateLMS(`${zoneData[this.currentZone].name} 인증 완료`);
                     }
-                } catch (err) { alert("서버 대기 중입니다. 구글 배포 설정을 확인하세요."); }
+                } catch (err) {
+                    clearTimeout(timeoutId);
+                    console.error(err);
+                    alert("⚠️ 구글 서버가 응답을 멈췄습니다.\n\n[해결 방법]\n구글 앱스 스크립트 창에서 [배포] -> [새 배포]를 누르신 후, 액세스 권한을 반드시 '모든 사용자(Anyone)'로 풀어서 새로 배포하셔야 합니다!");
+                } finally {
+                    btn.innerText = "📸 현재 이 화면 캡처하여 일지에 올리기";
+                    btn.disabled = false;
+                }
             };
             reader.readAsDataURL(file);
         },
@@ -317,7 +341,6 @@
             else if(pw !== null) alert("비밀번호가 틀렸습니다.");
         },
 
-        // 구글 드라이브 원본 주소를 웹 앱 미리보기 썸네일 전용 주소로 자동 포맷 변환
         convertDriveLink: (url) => {
             if(!url) return "";
             return url.replace("/file/d/", "/uc?export=view&id=").replace("/view?usp=drivesdk", "").replace("/view", "");
@@ -336,7 +359,6 @@
                     const row = document.createElement('tr');
                     row.className = "border-b hover:bg-slate-50 transition";
                     
-                    // 대시보드 썸네일 이미지 출력
                     let imgHtml = "";
                     if(d.imageMap) {
                         for(let k in d.imageMap) {
@@ -348,7 +370,6 @@
                         }
                     }
 
-                    // 느낀 점 출력
                     let thoughtHtml = "";
                     if(d.thoughts) {
                         for(let k in d.thoughts) {
