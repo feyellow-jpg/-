@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서부산 탐험대 LMS 시스템</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f1f5f9; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        
+        <div id="login-screen" class="bg-white p-6 rounded-2xl shadow-md text-center max-w-md mx-auto">
+            <h1 class="text-2xl font-bold text-blue-600 mb-2">🧭 날아라! 서부산 탐험대</h1>
+            <p class="text-gray-500 mb-6 text-sm">우리 고장 부산을 재미있게 공부해봅시다!</p>
+            <div class="space-y-4">
+                <input type="number" id="student-num" placeholder="번호 (예: 5)" class="w-full p-3 border rounded-xl focus:outline-blue-500">
+                <input type="text" id="student-name" placeholder="이름 (예: 홍길동)" class="w-full p-3 border rounded-xl focus:outline-blue-500">
+                <button onclick="startLearning()" class="w-full bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700 transition">탐험 시작하기</button>
+            </div>
+            <div class="mt-6 pt-4 border-t border-gray-100 text-right">
+                <button onclick="toggleTeacherView()" class="text-xs text-gray-400 hover:underline">교사 대시보드 보기</button>
+            </div>
+        </div>
+
+        <div id="quiz-screen" class="bg-white p-6 rounded-2xl shadow-md max-w-xl mx-auto hidden">
+            <div class="flex justify-between items-center mb-4 text-sm text-gray-500">
+                <span id="student-info" class="font-bold text-blue-600"></span>
+                <span id="progress">문제 1 / 5</span>
+            </div>
+            <div id="quiz-icon" class="text-5xl my-4 text-center">🏝️</div>
+            <div id="question" class="text-lg font-bold mb-6 text-gray-800">질문이 이곳에 표시됩니다.</div>
+            <div id="options" class="grid grid-cols-1 gap-3">
+                </div>
+            <div id="feedback" class="mt-4 text-center font-bold text-lg h-6"></div>
+        </div>
+
+        <div id="result-screen" class="bg-white p-6 rounded-2xl shadow-md text-center max-w-md mx-auto hidden">
+            <h1 class="text-2xl font-bold text-orange-500 mb-2">🎉 탐험 완료!</h1>
+            <p class="text-gray-600">서부산 탐험 점수를 기록했습니다.</p>
+            <div id="score" class="text-5xl font-extrabold text-orange-500 my-6">0점</div>
+            <p id="comment" class="text-gray-700 font-medium mb-6">참 잘했어요!</p>
+            <button onclick="location.reload()" class="bg-gray-500 text-white px-6 py-2 rounded-xl">처음으로 돌아가기</button>
+        </div>
+
+        <div id="teacher-dashboard" class="bg-white p-6 rounded-2xl shadow-md mt-10 hidden">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">📊 실시간 서부산 학습 관찰 대시보드</h2>
+                <button onclick="toggleTeacherView()" class="text-sm bg-gray-200 text-gray-700 px-3 py-1 rounded-lg">닫기</button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-gray-700 text-sm font-semibold">
+                            <th class="p-3 border-b">번호</th>
+                            <th class="p-3 border-b">이름</th>
+                            <th class="p-3 border-b">현재 진행 상태</th>
+                            <th class="p-3 border-b">현재 점수</th>
+                            <th class="p-3 border-b">최근 업데이트 시간</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-list" class="text-sm text-gray-600">
+                        <tr>
+                            <td colspan="5" class="p-4 text-center text-gray-400">접속한 학생이 아직 없습니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // 쌤이 보내주신 실제 사하구 프로젝트 설정값 반영 완료! 🚀
+        const firebaseConfig = {
+            apiKey: "AIzaSyCS8kWxKMV9qk06wxeEaYnNa9FK652CDsU",
+            authDomain: "sahagu-69868.firebaseapp.com",
+            projectId: "sahagu-69868",
+            storageBucket: "sahagu-69868.firebasestorage.app",
+            messagingSenderId: "635938643907",
+            appId: "1:635938643907:web:c6fc1a012c7acea1a76776",
+            measurementId: "G-35GC10BWF1"
+        };
+
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 퀴즈 데이터 정의
+        const quizData = [
+            { question: "낙동강과 바다가 만나는 곳에 만들어진 모래섬으로, 철새들이 찾아오는 서부산의 대표적인 자연 보호 구역은?", options: ["을숙도", "영도", "오륙도", "해운대"], answer: 0, icon: "🦆" },
+            { question: "강서구에 위치한 곳으로, 옛날 가야의 수로왕과 허왕후가 만났다는 전설이 깃든 산은?", options: ["금정산", "황령산", "오봉산", "분산"], answer: 2, icon: "⛰️" },
+            { question: "사하구에 있는 마을로, 알록달록한 집들이 모여 있어 '부산의 마추픽추'라고 불리는 곳은?", options: ["흰여울문화마을", "감천문화마을", "초량이바구길", "청학동마을"], answer: 1, icon: "🏡" },
+            { question: "사하구 다대동에 위치하여 백사장과 넓은 갯벌 체험, 낙조(노을) 분수 쇼가 유명한 해수욕장은?", options: ["송정해수욕장", "광안리해수욕장", "송도해수욕장", "다대포해수욕장"], answer: 3, icon: "🌅" },
+            { question: "사상구에 있는 넓은 공원으로, 삼락생태공원과 함께 시민들의 쉼터가 되며 봄철 벚꽃길로 유명한 곳은?", options: ["삼락생태공원", "시민공원", "어린이대공원", "용두산공원"], answer: 0, icon: "🌸" }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let studentKey = "";
+        let studentName = "";
+        let studentNum = "";
+
+        // 함수 전역 등록 (HTML onclick 연동용)
+        window.startLearning = startLearning;
+        window.toggleTeacherView = toggleTeacherView;
+
+        // 1. 학생 로그인 및 데이터베이스 초기화 등록
+        async function startLearning() {
+            studentNum = document.getElementById('student-num').value.trim();
+            studentName = document.getElementById('student-name').value.trim();
+
+            if (!studentNum || !studentName) {
+                alert("번호와 이름을 모두 입력해 주세요!");
+                return;
+            }
+
+            const paddedNum = studentNum.padStart(2, '0');
+            studentKey = `${paddedNum}_${studentName}`;
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('student-info').innerText = `${studentNum}번 ${studentName} 탐험가`;
+
+            await saveProgress("학습 시작함", 0);
+            loadQuestion();
+        }
+
+        // 2. 실시간 상태 전송 함수
+        async function saveProgress(status, currentScore) {
+            if (!studentKey) return;
+            try {
+                await setDoc(doc(db, "seobusan_lms", studentKey), {
+                    num: parseInt(studentNum),
+                    name: studentName,
+                    status: status,
+                    score: currentScore,
+                    timestamp: new Date().toLocaleTimeString('ko-KR')
+                }, { merge: true });
+            } catch (e) {
+                console.error("데이터 저장 실패: ", e);
+            }
+        }
+
+        // 3. 문제 출력
+        function loadQuestion() {
+            const feedbackEl = document.getElementById('feedback');
+            feedbackEl.innerText = '';
+            
+            const currentQuiz = quizData[currentQuestionIndex];
+            document.getElementById('progress').innerText = `문제 ${currentQuestionIndex + 1} / ${quizData.length}`;
+            document.getElementById('quiz-icon').innerText = currentQuiz.icon;
+            document.getElementById('question').innerText = currentQuiz.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            currentQuiz.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.innerText = `${index + 1}. ${option}`;
+                button.className = "w-full text-left p-4 border-2 border-slate-200 rounded-xl hover:bg-blue-50 hover:border-blue-400 transition font-medium text-gray-700";
+                button.onclick = () => checkAnswer(index);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // 4. 정답 확인 및 실시간 전송 트리거
+        async function checkAnswer(selectedIndex) {
+            const currentQuiz = quizData[currentQuestionIndex];
+            const buttons = document.getElementById('options').getElementsByTagName('button');
+            
+            for(let btn of buttons) btn.disabled = true;
+
+            const feedbackEl = document.getElementById('feedback');
+            if (selectedIndex === currentQuiz.answer) {
+                feedbackEl.innerText = "⭕ 정답입니다!";
+                feedbackEl.className = "mt-4 text-center font-bold text-lg h-6 text-green-600";
+                score += 20;
+            } else {
+                feedbackEl.innerText = `❌ 오답! 정답은 [${currentQuiz.options[currentQuiz.answer]}]`;
+                feedbackEl.className = "mt-4 text-center font-bold text-lg h-6 text-red-500";
+            }
+
+            currentQuestionIndex++;
+            const currentStatus = currentQuestionIndex < quizData.length ? `${currentQuestionIndex + 1}번 문제 푸는 중` : "학습 완료";
+            await saveProgress(currentStatus, score);
+
+            setTimeout(() => {
+                if (currentQuestionIndex < quizData.length) {
+                    loadQuestion();
+                } else {
+                    showResult();
+                }
+            }, 2000);
+        }
+
+        // 5. 학습 종료 화면
+        function showResult() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('score').innerText = `${score}점`;
+            
+            const commentEl = document.getElementById('comment');
+            if(score === 100) commentEl.innerText = "🏅 완벽해요! 서부산 박사로 임명합니다!";
+            else if(score >= 60) commentEl.innerText = "👍 고장에 대해 아주 훌륭하게 학습했군요!";
+            else commentEl.innerText = "📖 교재를 조금 더 살펴보고 다시 도전해 봐요!";
+        }
+
+        // 6. 교사용 실시간 스트리밍 모니터링
+        let unsubscribe = null;
+        function toggleTeacherView() {
+            const dashboard = document.getElementById('teacher-dashboard');
+            if (dashboard.classList.contains('hidden')) {
+                dashboard.classList.remove('hidden');
+                
+                // 번호 순서(오름차순)대로 실시간 정렬하여 가져오기
+                const q = query(collection(db, "seobusan_lms"), orderBy("num", "asc"));
+                
+                unsubscribe = onSnapshot(q, (querySnapshot) => {
+                    const tbody = document.getElementById('student-list');
+                    tbody.innerHTML = '';
+                    
+                    if(querySnapshot.empty) {
+                        tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">접속한 학생이 아직 없습니다.</td></tr>`;
+                        return;
+                    }
+
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const row = document.createElement('tr');
+                        row.className = "border-b hover:bg-slate-50 transition";
+                        
+                        let statusBadge = `<span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">${data.status}</span>`;
+                        if(data.status === "학습 완료") {
+                            statusBadge = `<span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">🎉 학습 완료</span>`;
+                        }
+
+                        row.innerHTML = `
+                            <td class="p-3 font-medium text-gray-900">${data.num}번</td>
+                            <td class="p-3">${data.name}</td>
+                            <td class="p-3">${statusBadge}</td>
+                            <td class="p-3 font-bold text-orange-500">${data.score}점</td>
+                            <td class="p-3 text-xs text-gray-400">${data.timestamp}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                });
+            } else {
+                dashboard.classList.add('hidden');
+                if (unsubscribe) unsubscribe();
+            }
+        }
+    </script>
+</body>
+</html>
